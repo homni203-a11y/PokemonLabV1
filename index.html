@@ -3,57 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hệ Thống Gen Pokemon V3 - Cyberpunk UI</title>
+    <title>Hệ Thống Gen Pokemon V4 - Cyberpunk Ultimate Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-biom">
     <div class="bg-grid"></div>
 
-    <!-- HEADER -->
+    <!-- TOP NAVIGATION (5 NÚT CHỨC NĂNG CHUẨN GỐC) -->
     <header class="header">
         <div class="header-left">
             <div class="core-icon">
-                <svg id="icon-biom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <svg id="core-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             </div>
-            <h1 id="core-title">BIOMNITRIX</h1>
+            <h1 id="core-title">LÕI ĐÁ BIOM</h1>
         </div>
-        <div class="header-right">
-            <button class="nav-btn" onclick="UI.openPokedex()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <div class="header-right desktop-nav">
+            <button class="nav-btn" onclick="UI.openModal('modal-pokedex')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span>POKÉDEX</span>
             </button>
             <button class="nav-btn" onclick="UI.openModal('modal-settings')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span>HỆ THỐNG</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                <span>CÀI ĐẶT</span>
+            </button>
+            <button class="nav-btn" onclick="UI.openModal('modal-arena')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>ĐẤU TRƯỜNG</span>
+            </button>
+            <button class="nav-btn" onclick="UI.openPokedex()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                <span>BỘ SƯU TẬP</span>
+            </button>
+            <button class="nav-btn" onclick="UI.switchTab('biom')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                <span>ĐỔI LÕI ĐÁ</span>
             </button>
         </div>
     </header>
 
     <main class="main-container">
-        <!-- KHU VỰC ĐIỀU KHIỂN (TRÁI) -->
-        <section class="col-left active" id="col-left">
-            <!-- 3 TABS MỚI -->
+        <!-- KHU VỰC TRÁI: ĐIỀU KHIỂN & CHỌN LÕI -->
+        <section class="col-left active" id="col-left-panel">
             <div class="tabs">
-                <button class="tab-btn" data-theme="ultimate" onclick="UI.switchTab('ultimate')">⚡ ULTIMATE</button>
-                <button class="tab-btn active" data-theme="biom" onclick="UI.switchTab('biom')">📚 BIOMNITRIX</button>
-                <button class="tab-btn" data-theme="chaques" onclick="UI.switchTab('chaques')">🤍 CHAQUETRIX</button>
+                <button class="tab-btn" data-theme="ultimate" onclick="UI.switchTab('ultimate')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>LÕI ĐÁ ULTIMATE</span>
+                </button>
+                <button class="tab-btn active" data-theme="biom" onclick="UI.switchTab('biom')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <span>LÕI ĐÁ BIOM</span>
+                </button>
+                <button class="tab-btn" data-theme="chaques" onclick="UI.switchTab('chaques')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    <span>LÕI ĐÁ CHAQUES</span>
+                </button>
             </div>
 
             <div class="tab-content-wrapper">
                 <div class="panel-header">
-                    <h3 id="panel-title">THIẾT LẬP DUNG HỢP</h3>
-                    <button class="dice-btn" onclick="CoreLogic.randomizeAll()" title="Ngẫu nhiên DNA">🎲</button>
+                    <h3 id="panel-title">THIẾT LẬP DUNG HỢP ĐA GEN</h3>
+                    <div class="panel-actions">
+                        <!-- Nút Xúc Xắc có hiệu ứng shake -->
+                        <button class="dice-btn" id="dice-btn" onclick="CoreLogic.randomizeAll()" title="Ngẫu nhiên DNA">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="16" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ĐIỀU KHIỂN SỐ LƯỢNG SLOT CHO TAB BIOMSTONE (2 đến 5 Pokemon) -->
+                <div id="biom-slot-controls" class="slot-control-bar" style="display: none;">
+                    <span>SỐ LƯỢNG GEN (2-5):</span>
+                    <button class="slot-cnt-btn" onclick="UI.adjustBiomSlots(-1)">-</button>
+                    <span id="biom-slot-count">2</span>
+                    <button class="slot-cnt-btn" onclick="UI.adjustBiomSlots(1)">+</button>
                 </div>
 
                 <!-- GEN BOX LIST -->
                 <div class="gen-list" id="gen-list-container">
-                    <!-- DOM sinh ra từ JS -->
+                    <!-- Dynamic Gen Boxes -->
                 </div>
 
-                <!-- CHAQUETRIX EXTRA UI (Bị ẩn ở Tab khác) -->
+                <!-- THANH BẤT ỔN GEN (Dành riêng Biomstone) -->
+                <div id="instability-container" class="control-group" style="display: none;">
+                    <div class="instability-header">
+                        <label>MỨC ĐỘ BẤT ỔN GEN (GENE INSTABILITY)</label>
+                        <span id="instability-val">15%</span>
+                    </div>
+                    <div class="instability-bar-bg">
+                        <div class="instability-bar-fill" id="instability-fill" style="width: 15%;"></div>
+                    </div>
+                </div>
+
+                <!-- CHAQUETRIX MODULE (Size scale & Personality) -->
                 <div id="chaquetrix-module" style="display: none;">
                     <div class="control-group">
-                        <label>TỈ LỆ CƠ THỂ</label>
+                        <label>TỈ LỆ CƠ THỂ (7 NẤC CHUẨN)</label>
                         <div class="size-scale">
                             <div class="size-step" data-val="1"></div>
                             <div class="size-step" data-val="2"></div>
@@ -82,18 +126,55 @@
                     </div>
                 </div>
 
-                <button class="action-btn" onclick="CoreLogic.startSequence()">KÍCH HOẠT QUÁ TRÌNH</button>
+                <button class="action-btn" onclick="CoreLogic.startSequence()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    KÍCH HOẠT QUÁ TRÌNH
+                </button>
             </div>
         </section>
 
-        <!-- KHU VỰC KẾT QUẢ AI (PHẢI) -->
+        <!-- KHU VỰC PHẢI: MÀN HÌNH CHỜ / KẾT QUẢ AI -->
         <section class="col-right" id="col-right">
+            <!-- Trạng thái chờ mặc định -->
             <div class="state-view active" id="idle-view">
-                <div class="core-anim-container"><div class="pulse-ring"></div></div>
-                <p class="status-text">ĐANG CHỜ LỆNH HỆ THỐNG...</p>
+                <div class="pokeball-spinner-container">
+                    <div class="pokeball-spinner">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:30px;height:30px;color:var(--primary-color)"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                </div>
+                <p class="status-text">HỆ THỐNG SẴN SÀNG - CHỜ LỆNH NẠP GEN...</p>
             </div>
+
+            <!-- Trạng thái Loading khi bấm kích hoạt -->
+            <div class="state-view" id="loading-view" style="display: none;">
+                <div class="pokeball-spinner-container">
+                    <div class="pokeball-spinner" style="animation-duration: 0.8s;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:30px;height:30px;color:var(--primary-color)"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                </div>
+                <p class="status-text" id="loading-status-text">Đang khởi tạo chuỗi cộng hưởng lượng tử...</p>
+                <div class="progress-bar-bg" style="width: 250px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; margin-top: 15px; overflow:hidden;">
+                    <div class="progress-bar-fill" id="progress-fill" style="width: 0%; height: 100%; background: var(--primary-color); transition: width 0.1s linear; box-shadow: 0 0 10px var(--primary-glow);"></div>
+                </div>
+                <span id="progress-percent" style="font-family:var(--font-mono); font-size:11px; color:var(--primary-color); margin-top:5px;">0%</span>
+            </div>
+
+            <!-- Trạng thái Kết quả Hologram -->
+            <div class="result-hologram" id="result-view"></div>
         </section>
     </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Mới bổ sung cho mobile) -->
+    <nav class="mobile-bottom-nav">
+        <button class="m-nav-btn active" id="mnav-lab" onclick="UI.switchMobileTab('lab')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2v7.31L4.35 19.1A2 2 0 0 0 6 22h12a2 2 0 0 0 1.65-2.9L14 9.31V2h-4z"/></svg>
+            <span>THÍ NGHIỆM</span>
+        </button>
+        <button class="m-nav-btn" id="mnav-result" onclick="UI.switchMobileTab('result')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>KẾT QUẢ AI</span>
+        </button>
+    </nav>
 
     <!-- POKEDEX MODAL -->
     <div id="modal-pokedex" class="modal-overlay">
@@ -101,11 +182,9 @@
             <button class="modal-close" onclick="UI.closeModal('modal-pokedex')">&times;</button>
             <h2>POKÉDEX DATABASE</h2>
             <div class="search-wrap">
-                <input type="text" id="dex-search" class="cyber-input" placeholder="Nhập tên hoặc ID Pokemon...">
+                <input type="text" id="dex-search" class="cyber-input" placeholder="Nhập tên hoặc ID Pokemon..." oninput="UI.filterPokedex(this.value)">
             </div>
-            <div id="dex-grid" class="collection-grid">
-                <!-- JS Load -->
-            </div>
+            <div id="dex-grid" class="collection-grid"></div>
         </div>
     </div>
 
@@ -113,11 +192,20 @@
     <div id="modal-settings" class="modal-overlay">
         <div class="modal-box">
             <button class="modal-close" onclick="UI.closeModal('modal-settings')">&times;</button>
-            <h2>HỆ THỐNG</h2>
-            <div class="control-group">
-                <label>SFX ÂM THANH</label>
+            <h2>CÀI ĐẶT HỆ THỐNG</h2>
+            <div class="control-group" style="margin-top:15px;">
+                <label>HIỆU ỨNG ÂM THANH SFX</label>
                 <button id="btn-toggle-sound" class="action-btn" style="margin-top:10px" onclick="SoundFX.toggle()">ĐANG BẬT 🔊</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ARENA MODAL -->
+    <div id="modal-arena" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="UI.closeModal('modal-arena')">&times;</button>
+            <h2>ĐẤU TRƯỜNG MÔ PHỎNG</h2>
+            <p style="font-size:12px; color:#aaa; margin-top:15px; line-height:1.6;">Hệ thống đang thiết lập chuồng đấu giả lập cho các sinh vật gen đột biến. Vui lòng hoàn thành quá trình dung hợp trước khi tham chiến.</p>
         </div>
     </div>
 
