@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>PokemonLab - Hệ Thống Quản Lý</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-biostone">
+  <div class="app-container">
+    <header class="header">
+      <h1 id="app-title">PokemonLab</h1>
+      <!-- Các nút chuyển đổi lõi -->
+      <nav class="tabs" role="tablist">
+        <button type="button" class="tab tab-active" role="tab" data-tab="biostone">
+          BIOSTONE
+        </button>
+        <button type="button" class="tab" role="tab" data-tab="ultimatestone">
+          ULTIMATESTONE
+        </button>
+        <button type="button" class="tab" role="tab" data-tab="chaquestone">
+          CHAQUESTONE
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Khu vực hiển thị thông tin Pokemon -->
+      <div id="pokemon-display">
+        <!-- Thông số GEN sẽ được render tại đây -->
+      </div>
+      
+      <!-- Nút thao tác -->
+      <button id="action-btn" class="btn-primary">
+        <span class="btn-text">TRÍCH XUẤT GEN</span>
+      </button>
+    </main>
+
+    <!-- Modal chọn Pokemon -->
+    <div id="selection-modal" class="modal hidden">
+      <h3 id="modalTitle">KHO LƯU TRỮ GEN POKEMON</h3>
+      <div id="pokemon-list" class="grid-list"></div>
+    </div>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>

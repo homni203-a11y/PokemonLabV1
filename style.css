@@ -1,0 +1,45 @@
+/* Khởi tạo màu sắc gốc của PokemonLab */
+:root {
+  --lab-bg: #1a1a2e;
+  --text-main: #ffffff;
+}
+
+body {
+  background-color: var(--lab-bg);
+  color: var(--text-main);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Theme Biostone */
+body.theme-biostone {
+  --theme-base: #ff4747; /* Đỏ Pokeball */
+  --theme-glow: rgba(255, 71, 71, 0.55);
+}
+
+/* Theme Ultimatestone */
+body.theme-ultimatestone {
+  --theme-base: #1df2a5; /* Xanh lá */
+  --theme-glow: rgba(29, 242, 165, 0.55);
+}
+
+/* Theme Chaquestone (Đã đổi tên) */
+body.theme-chaquestone {
+  --theme-base: #ff539b; /* Hồng */
+  --theme-glow: rgba(255, 83, 155, 0.55);
+}
+
+.btn-primary {
+  background-color: var(--theme-base);
+  box-shadow: 0 0 10px var(--theme-glow);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 20px var(--theme-glow);
+}
