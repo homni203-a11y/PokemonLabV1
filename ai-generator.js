@@ -1,330 +1,90 @@
 /**
- * HỆ THỐNG ĐIỀU KHIỂN CHÍNH (MAIN.JS)
+ * MODULE: GEMINI & IMAGE AI INTEGRATION CORE
  */
+const AIGenerator = {
+    // 🔑 API Key Google AI Studio của bạn
+    apiKey: "AQ.Ab8RN6JhXImix19AEaCoJYyR_DNyBrqoYcmpPJo7Zd05jt_RxA",
 
-// --- 1. HỆ THỐNG ÂM THANH WEB AUDIO API (SFX) ---
-const SoundFX = {
-    enabled: true,
-    ctx: new (window.AudioContext || window.webkitAudioContext)(),
-    toggle: function() {
-        this.enabled = !this.enabled;
-        document.getElementById('btn-toggle-sound').textContent = this.enabled ? "ĐANG BẬT 🔊" : "ĐÃ TẮT 🔇";
-    },
-    playTone: function(freq, type, duration, detune = 0) {
-        if (!this.enabled) return;
-        try {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = type; 
-            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-            osc.detune.setValueAtTime(detune, this.ctx.currentTime);
-            gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-            osc.connect(gain); gain.connect(this.ctx.destination);
-            osc.start(); osc.stop(this.ctx.currentTime + duration);
-        } catch(e) {}
-    },
-    hover: () => SoundFX.playTone(550, 'sine', 0.08),
-    click: () => SoundFX.playTone(850, 'square', 0.08),
-    confirm: () => SoundFX.playTone(1200, 'triangle', 0.15),
-    remove: () => SoundFX.playTone(300, 'sawtooth', 0.2, -50)
-};
+    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH (CHIA 3 NHÁNH THEO YÊU CẦU)
+    buildImagePrompt: function(dnaList, theme, sizeStr, waifuTrait) {
+        const validDnas = dnaList.filter(Boolean);
+        if (validDnas.length === 0) return "A mysterious glowing egg";
 
-document.addEventListener('click', (e) => { 
-    if(e.target.closest('button') || e.target.closest('.size-step') || e.target.closest('.col-item')) SoundFX.click(); 
-});
-document.addEventListener('mouseover', (e) => { 
-    if(e.target.closest('button')) SoundFX.hover(); 
-});
-
-// --- 2. QUẢN LÝ GIAO DIỆN & STATE ---
-const UI = {
-    currentTab: 'biom',
-    sizeTexts: ["SIÊU NHỎ", "RẤT NHỎ", "NHỎ", "B.THƯỜNG", "LỚN", "RẤT LỚN", "SIÊU LỚN"],
-    currentSize: "B.THƯỜNG",
-    currentWaifu: "TOMBOY",
-    activeBoxToFill: null,
-    
-    genData: {
-        ultimate: [null],
-        biom: [null, null], 
-        chaques: [null]
-    },
-
-    switchTab: function(tabId) {
-        this.currentTab = tabId;
-        document.body.className = `theme-${tabId}`;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === tabId));
+        const names = validDnas.map(d => d.name).join(' and ');
+        const types = validDnas.flatMap(d => d.types).join(', ');
         
-        const titles = { ultimate: "LÕI ĐÁ ULTIMATE", biom: "LÕI ĐÁ BIOM", chaques: "LÕI ĐÁ CHAQUES" };
-        document.getElementById('core-title').textContent = titles[tabId];
+        // Phong cách bắt buộc: 2D vector Full HD, đậm chất Pokémon
+        const baseStyle = "Authentic official Pokémon art style, 2D vector illustration, Full HD 1080p, flat colors, clean crisp vector lines, solid white background, high quality masterpiece.";
         
-        document.getElementById('biom-slot-controls').style.display = (tabId === 'biom') ? 'flex' : 'none';
-        document.getElementById('instability-container').style.display = (tabId === 'biom') ? 'block' : 'none';
-        document.getElementById('chaquetrix-module').style.display = (tabId === 'chaques') ? 'block' : 'none';
-        
-        this.renderGenBoxes();
-        if(tabId === 'biom') this.updateInstability();
-        this.showIdleView();
-    },
+        let specificPrompt = "";
 
-    switchMobileTab: function(viewName) {
-        document.querySelectorAll('.m-nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`mnav-${viewName}`).classList.add('active');
+        if (theme === 'ultimate') {
+            // Ultimatestone: Ép tiến hóa trong môi trường khắc nghiệt
+            const env = types.includes('Fire') ? "magma core" : types.includes('Water') ? "abyssal trench" : "harsh radioactive apocalyptic";
+            specificPrompt = `An ultimate mutated form of Pokémon ${names}. It was forced to evolve over thousands of years in a ${env} environment to achieve ultimate god-like power. Highly intimidating, glowing elemental aura of ${types}, complex monster design, size: ${sizeStr}.`;
         
-        if(viewName === 'lab') {
-            document.getElementById('col-left-panel').classList.add('mobile-active');
-            document.getElementById('col-right').classList.remove('mobile-active');
+        } else if (theme === 'chaques') {
+            // Chaquestone: Nữ chiến binh đồng hành dạng người dựa trên tính cách
+            specificPrompt = `Humanoid female anthropomorphic version of Pokémon ${names}. A beautiful anime girl companion working alongside the player. She has a ${waifuTrait} personality. Wearing a stylish outfit inspired by ${names} and ${types} types. Beautiful face, expressive eyes, size: ${sizeStr}.`;
+        
         } else {
-            document.getElementById('col-right').classList.add('mobile-active');
-            document.getElementById('col-left-panel').classList.remove('mobile-active');
+            // Biomstone: Dung hợp 2-5 Pokemon
+            specificPrompt = `A seamless hybrid fusion Pokémon combining the DNA of ${names}. Blending their physical traits and ${types} elemental features harmoniously. New unique Pokémon species, size: ${sizeStr}.`;
         }
-    },
-
-    showIdleView: function() {
-        document.getElementById('idle-view').style.display = 'flex';
-        document.getElementById('loading-view').style.display = 'none';
-        document.getElementById('result-view').classList.remove('active');
-    },
-
-    openModal: (id) => document.getElementById(id).classList.add('active'),
-    closeModal: (id) => document.getElementById(id).classList.remove('active'),
-
-    adjustBiomSlots: function(change) {
-        SoundFX.click();
-        let currentLen = this.genData.biom.length;
-        let newLen = currentLen + change;
-        if(newLen >= 2 && newLen <= 5) {
-            if(newLen > currentLen) {
-                this.genData.biom.push(null);
-            } else {
-                this.genData.biom.pop();
-            }
-            document.getElementById('biom-slot-count').textContent = this.genData.biom.length;
-            this.renderGenBoxes();
-            this.updateInstability();
-        }
-    },
-
-    updateInstability: function() {
-        const filledCount = this.genData.biom.filter(Boolean).length;
-        const totalSlots = this.genData.biom.length;
-        const score = Math.min(100, Math.round((filledCount / totalSlots) * 35 + (totalSlots * 12)));
-        document.getElementById('instability-val').textContent = `${score}%`;
-        document.getElementById('instability-fill').style.width = `${score}%`;
-    },
-
-    openPokedex: function(boxIndex = null) {
-        this.activeBoxToFill = boxIndex;
-        this.renderPokedexGrid(PokemonDB);
-        this.openModal('modal-pokedex');
-    },
-
-    renderPokedexGrid: function(list) {
-        const grid = document.getElementById('dex-grid');
-        grid.innerHTML = list.map(p => `
-            <div class="col-item" onclick="UI.selectPokemon(${p.id})">
-                <img src="${p.img}">
-                <span>${p.name}</span>
-            </div>
-        `).join('');
-    },
-
-    filterPokedex: function(keyword) {
-        const key = keyword.toLowerCase().trim();
-        const filtered = PokemonDB.filter(p => p.name.toLowerCase().includes(key) || p.id.toString() === key);
-        this.renderPokedexGrid(filtered);
-    },
-
-    selectPokemon: function(id) {
-        const pkmn = PokemonDB.find(p => p.id === id);
-        if(this.activeBoxToFill !== null && pkmn) {
-            this.genData[this.currentTab][this.activeBoxToFill] = pkmn;
-            this.renderGenBoxes();
-            if(this.currentTab === 'biom') this.updateInstability();
-            SoundFX.confirm();
-        }
-        this.closeModal('modal-pokedex');
-    },
-
-    removePokemon: function(index, e) {
-        e.stopPropagation();
-        SoundFX.remove();
-        this.genData[this.currentTab][index] = null;
-        this.renderGenBoxes();
-        if(this.currentTab === 'biom') this.updateInstability();
-    },
-
-    renderGenBoxes: function() {
-        const container = document.getElementById('gen-list-container');
-        container.innerHTML = '';
-        const dataArr = this.genData[this.currentTab];
         
-        dataArr.forEach((pkmn, i) => {
-            if(!pkmn) {
-                container.innerHTML += `
-                    <div class="gen-box empty" onclick="UI.openPokedex(${i})">
-                        <div class="empty-ui">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                            <span>NẠP MÃ GEN #${i+1}</span>
-                        </div>
-                    </div>`;
-            } else {
-                container.innerHTML += `
-                    <div class="gen-box filled" onclick="UI.openPokedex(${i})">
-                        <div class="filled-top">
-                            <span>GEN SEQ #${pkmn.id}</span>
-                            <button class="btn-remove" onclick="UI.removePokemon(${i}, event)" title="Gỡ Pokemon">&times;</button>
-                        </div>
-                        <div class="filled-img">
-                            <img src="${pkmn.img}">
-                            <div class="hover-hint">NHẤN ĐỂ ĐỔI DNA</div>
-                        </div>
-                        <div class="filled-name">${pkmn.name}</div>
-                        <div class="filled-size">${pkmn.types.join(' / ').toUpperCase()}</div>
-                    </div>`;
-            }
-        });
-    }
-};
-
-// Event handlers cho size & waifu
-document.querySelectorAll('.size-step').forEach(el => {
-    el.addEventListener('click', () => {
-        document.querySelectorAll('.size-step').forEach(s => s.classList.remove('active'));
-        el.classList.add('active');
-        UI.currentSize = UI.sizeTexts[parseInt(el.dataset.val) - 1];
-        document.getElementById('size-label').textContent = UI.currentSize;
-    });
-});
-
-document.querySelectorAll('.grid-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('waifu-desc').textContent = btn.dataset.desc;
-        UI.currentWaifu = btn.textContent;
-    });
-});
-
-// --- 3. CORE LOGIC & PRELOAD AI ---
-const CoreLogic = {
-    randomizeAll: function() {
-        const diceBtn = document.getElementById('dice-btn');
-        diceBtn.classList.add('shaking');
-        setTimeout(() => diceBtn.classList.remove('shaking'), 400);
-
-        const arr = UI.genData[UI.currentTab];
-        for(let i = 0; i < arr.length; i++) {
-            arr[i] = getRandomPokemon();
-        }
-        UI.renderGenBoxes();
-        if(UI.currentTab === 'biom') UI.updateInstability();
-        SoundFX.confirm();
+        return `${specificPrompt} ${baseStyle}`;
     },
 
-    startSequence: async function() {
-        const arr = UI.genData[UI.currentTab];
-        if(arr.includes(null)) {
-            alert("CẢNH BÁO LƯỢNG TỬ: Phải nạp đầy đủ tất cả các slot gen yêu cầu trước khi tiến hành khởi chạy!"); 
-            return;
-        }
-        SoundFX.confirm();
+    // 2. GỌI GEMINI API ĐỂ SINH LORE CHI TIẾT
+    generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
+        const validDnas = dnaList.filter(Boolean);
+        if (validDnas.length === 0) return "Chưa có mẫu vật DNA.";
         
-        if(window.innerWidth <= 768) {
-            UI.switchMobileTab('result');
+        const names = validDnas.map(d => d.name).join(', ');
+        const types = validDnas.flatMap(d => d.types).join(', ');
+        
+        let prompt = "";
+
+        if (theme === 'ultimate') {
+            prompt = `Bạn là hệ thống Pokedex tối thượng. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} bị ép phải tiến hóa đột biến trong môi trường khắc nghiệt trong thời gian hàng triệu năm để đạt được sức mạnh hủy diệt của hệ ${types}. Không giải thích thêm.`;
+        
+        } else if (theme === 'chaques') {
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} được áp dụng năng lượng Chaquestone để tạo thành 1 nữ chiến binh dạng cơ thể người. Cô ấy có tính cách ${waifuTrait}, dùng kỹ năng hệ ${types} để sát cánh và đồng hành bảo vệ người chơi. Không giải thích thêm.`;
+        
+        } else {
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt theo cấu trúc sau: "Sự kết hợp của ${names} tạo ra một sinh vật mới mang hình thái hòa trộn dựa trên đặc tính và kĩ năng của các Pokémon gốc. Nó sở hữu sức mạnh đột biến của hệ ${types}...". Hãy viết thật ngầu và không giải thích thêm.`;
         }
 
-        document.getElementById('idle-view').style.display = 'none';
-        document.getElementById('result-view').classList.remove('active');
-        const loadingView = document.getElementById('loading-view');
-        loadingView.style.display = 'flex';
-        
-        const progressFill = document.getElementById('progress-fill');
-        const percentText = document.getElementById('progress-percent');
-        const statusText = document.getElementById('loading-status-text');
-        
-        let currentPercent = 0;
-        progressFill.style.width = '0%';
-        percentText.textContent = '0%';
-
-        // BƯỚC 1: THANH LOAD CHẠY GIẢ LẬP ĐẾN 85% ĐỂ CHỜ DỮ LIỆU
-        statusText.textContent = "Đang trích xuất DNA & khởi tạo buồng lượng tử...";
-        const simulatedLoad = setInterval(() => {
-            if(currentPercent < 85) {
-                currentPercent += Math.floor(Math.random() * 4) + 2;
-                if(currentPercent > 85) currentPercent = 85;
-                progressFill.style.width = `${currentPercent}%`;
-                percentText.textContent = `${currentPercent}%`;
-            }
-        }, 120);
+        if (!this.apiKey || this.apiKey === "YOUR_AI_STUDIO_API_KEY_HERE") {
+            return `[Giả lập]: Lore của ${names} hệ ${types}. Đang chờ kết nối API.`;
+        }
 
         try {
-            const p1 = arr[0];
-            const imgPrompt = AIGenerator.buildImagePrompt(arr, UI.currentTab, UI.currentSize, UI.currentWaifu);
-            const aiImageUrl = AIGenerator.generateImageFromAPI(imgPrompt);
-            
-            statusText.textContent = "Hệ thống AI đang kết xuất đồ họa 2D Vector & Tổng hợp Lore...";
-
-            // Đợi song song API Text (Gemini) và Cache ảnh AI tải xong 100%
-            const [loreText] = await Promise.all([
-                AIGenerator.generateLoreFromAPI(arr, UI.currentTab, UI.currentWaifu),
-                new Promise((resolve) => {
-                    const img = new Image();
-                    img.onload = () => resolve();
-                    img.onerror = () => resolve(); // Tránh bị treo nếu mạng lỗi
-                    img.src = aiImageUrl;
-                })
-            ]);
-
-            // BƯỚC 2: KHI MỌI THỨ ĐÃ SẴN SÀNG -> CHẠY NỐT LÊN 100%
-            clearInterval(simulatedLoad);
-            currentPercent = 100;
-            progressFill.style.width = `100%`;
-            percentText.textContent = `100%`;
-            statusText.textContent = "Hoàn tất kết xuất thực thể AI!";
-
-            setTimeout(() => {
-                loadingView.style.display = 'none';
-                this.showResultData(arr, p1, imgPrompt, aiImageUrl, loreText);
-            }, 400);
-
-        } catch (err) {
-            console.error(err);
-            clearInterval(simulatedLoad);
-            statusText.textContent = "Lỗi kết nối Đa vũ trụ. Đang hủy bỏ...";
-            setTimeout(() => UI.showIdleView(), 2000);
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+            const data = await response.json();
+            if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                return data.candidates[0].content.parts[0].text.trim();
+            }
+            return "Hệ thống lượng tử phản hồi dữ liệu trống.";
+        } catch (error) {
+            console.error("Lỗi Gemini API:", error);
+            return `Đã xảy ra lỗi kết nối sóng tâm linh khi truy xuất thông tin của ${names}.`;
         }
     },
 
-    showResultData: function(arr, p1, imgPrompt, aiImageUrl, loreText) {
-        let finalName = "";
-        if(UI.currentTab === 'biom') {
-            finalName = arr.map(p => p.name.substring(0, 3)).join('-').toUpperCase();
-        } else if (UI.currentTab === 'ultimate') {
-            finalName = `OMEGA ${p1.name.toUpperCase()}`;
-        } else {
-            finalName = `CHQ-${p1.name.toUpperCase()}`;
-        }
+    // Alias tương thích
+    buildLorePrompt: async function(dnaList, theme, waifuTrait) {
+        return await this.generateLoreFromAPI(dnaList, theme, waifuTrait);
+    },
 
-        const resultView = document.getElementById('result-view');
-        resultView.classList.add('active');
-        resultView.innerHTML = `
-            <div class="ai-img-box">
-                <img src="${aiImageUrl}" alt="${finalName}" onerror="this.src='${p1.img}'">
-            </div>
-            <div class="ai-data">
-                <h2 class="ai-name">${finalName}</h2>
-                <p class="ai-lore">"${loreText}"</p>
-                <div class="ai-prompt" style="font-size: 10px; opacity: 0.7; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
-                    <strong>[HIDDEN SYSTEM LOG - IMAGE PROMPT]:</strong><br>
-                    ${imgPrompt}
-                </div>
-            </div>
-        `;
-        SoundFX.playTone(950, 'sine', 0.4);
+    // 3. TẠO URL ẢNH AI
+    generateImageFromAPI: function(promptText) {
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(promptText);
+        return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${seed}&model=anime&nologo=true&enhance=false`;
     }
 };
-
-// --- KHỞI TẠO GIAO DIỆN MẶC ĐỊNH ---
-UI.switchTab('biom');
