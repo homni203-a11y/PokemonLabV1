@@ -1,5 +1,5 @@
 /**
- * HỆ THỐNG ĐIỀU KHIỂN CHÍNH (MAIN.JS) - UPDATED
+ * HỆ THỐNG ĐIỀU KHIỂN CHÍNH (MAIN.JS)
  */
 
 // --- 1. HỆ THỐNG ÂM THANH WEB AUDIO API (SFX) ---
@@ -264,11 +264,11 @@ const CoreLogic = {
             const imgPrompt = AIGenerator.buildImagePrompt(arr, UI.currentTab, UI.currentSize, UI.currentWaifu);
             const aiImageUrl = AIGenerator.generateImageFromAPI(imgPrompt);
             
-            statusText.textContent = "Hệ thống AI đang kết xuất đồ họa 2D Vector, Đặt Tên & Viết Lore...";
+            statusText.textContent = "Hệ thống AI đang kết xuất đồ họa 2D Vector & Tổng hợp Lore...";
 
-            // Đợi song song API Gemini (Sinh Tên + Lore) và Cache ảnh AI tải xong 100%
-            const [aiResult] = await Promise.all([
-                AIGenerator.generateFusionDataFromAPI(arr, UI.currentTab, UI.currentWaifu),
+            // Đợi song song API Text (Gemini) và Cache ảnh AI tải xong 100%
+            const [loreText] = await Promise.all([
+                AIGenerator.generateLoreFromAPI(arr, UI.currentTab, UI.currentWaifu),
                 new Promise((resolve) => {
                     const img = new Image();
                     img.onload = () => resolve();
@@ -286,7 +286,7 @@ const CoreLogic = {
 
             setTimeout(() => {
                 loadingView.style.display = 'none';
-                this.showResultData(arr, p1, imgPrompt, aiImageUrl, aiResult.name, aiResult.lore);
+                this.showResultData(arr, p1, imgPrompt, aiImageUrl, loreText);
             }, 400);
 
         } catch (err) {
@@ -297,8 +297,15 @@ const CoreLogic = {
         }
     },
 
-    showResultData: function(arr, p1, imgPrompt, aiImageUrl, fusedName, loreText) {
-        const finalName = fusedName || "UNKNOWN FUSION";
+    showResultData: function(arr, p1, imgPrompt, aiImageUrl, loreText) {
+        let finalName = "";
+        if(UI.currentTab === 'biom') {
+            finalName = arr.map(p => p.name.substring(0, 3)).join('-').toUpperCase();
+        } else if (UI.currentTab === 'ultimate') {
+            finalName = `OMEGA ${p1.name.toUpperCase()}`;
+        } else {
+            finalName = `CHQ-${p1.name.toUpperCase()}`;
+        }
 
         const resultView = document.getElementById('result-view');
         resultView.classList.add('active');
