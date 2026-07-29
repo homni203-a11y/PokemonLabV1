@@ -4,7 +4,7 @@
  */
 const AIGenerator = {
     // 🔑 Dán API Key lấy từ Google AI Studio của bạn vào đây
-    apiKey: "YOUR_AI_STUDIO_API_KEY_HERE",
+    apiKey: "AQ.Ab8RN6JhXImix19AEaCoJYyR_DNyBrqoYcmpPJo7Zd05jt_RxA",
 
     // 1. GỌI GEMINI API ĐỂ SINH LORE ĐỘC BẢN CHO POKEMON LAI
     generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
