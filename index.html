@@ -1,42 +1,211 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokemonLab - Hệ Thống Quản Lý</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Gen Pokemon</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="theme-biostone">
-  <div class="app-container">
-    
-    <!-- Phần Header: Tiêu đề và Tabs -->
+<body class="theme-biom">
+    <!-- BACKGROUND GRID -->
+    <div class="bg-grid"></div>
+
+    <!-- HEADER -->
     <header class="header">
-      <h1 id="app-title">BIOSTONE</h1>
-      <nav class="tabs" role="tablist">
-        <button type="button" class="tab active" role="tab" data-tab="biostone">BIOSTONE</button>
-        <button type="button" class="tab" role="tab" data-tab="ultimatestone">ULTIMATESTONE</button>
-        <button type="button" class="tab" role="tab" data-tab="chaquestone">CHAQUESTONE</button>
-      </nav>
+        <div class="header-left">
+            <div class="core-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            </div>
+            <h1 id="core-title">LÕI ĐÁ BIOM</h1>
+        </div>
+        <div class="header-right">
+            <button class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>CÀI ĐẶT</span>
+            </button>
+            <button class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M15 3h6v6M10 14L2.1 21.9"/></svg>
+                <span>ĐẤU TRƯỜNG</span>
+            </button>
+            <button class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>BỘ SƯU TẬP</span>
+            </button>
+            <button class="nav-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <span>ĐỔI LÕI</span>
+            </button>
+        </div>
     </header>
 
-    <!-- Phần Nội dung chính -->
-    <main class="main-content">
-      <div class="action-section">
-        <button id="action-btn" class="btn-primary">
-          <span class="btn-text">DUNG HỢP GEN</span>
-        </button>
-      </div>
+    <!-- MAIN LAYOUT -->
+    <main class="main-container">
+        
+        <!-- CỘT TRÁI (CONTROLS) -->
+        <section class="col-left active" id="col-left">
+            <div class="tabs">
+                <button class="tab-btn active" data-theme="theme-biom" data-target="tab-biom">BIOMSTONE</button>
+                <button class="tab-btn" data-theme="theme-ultimate" data-target="tab-ultimate">ULTIMATESTONE</button>
+                <button class="tab-btn" data-theme="theme-chaques" data-target="tab-chaques">CHAQUESTONE</button>
+            </div>
 
-      <div class="storage-section">
-        <h2>KHO LƯU TRỮ GEN POKEMON</h2>
-        <div id="pokemon-list" class="pokemon-grid">
-          <!-- Danh sách Pokemon sẽ được JavaScript tạo tự động ở đây -->
-        </div>
-      </div>
+            <!-- TAB 1: BIOMSTONE -->
+            <div class="tab-content active" id="tab-biom">
+                <div class="panel-header">
+                    <h3>THIẾT LẬP DUNG HỢP</h3>
+                    <div class="counter-control">
+                        <button id="btn-sub-gen">-</button>
+                        <span id="gen-count-display">2</span>
+                        <button id="btn-add-gen">+</button>
+                    </div>
+                </div>
+                <div class="gen-list" id="biom-gen-list">
+                    <!-- JS sẽ render ô nạp gen tại đây -->
+                </div>
+                <div class="control-group">
+                    <label>CHẾ ĐỘ TRỘN:</label>
+                    <div class="toggle-group">
+                        <button class="sub-btn active">CHÍNH/PHỤ</button>
+                        <button class="sub-btn">CÂN BẰNG</button>
+                    </div>
+                    <input type="range" class="cyber-slider" min="0" max="100" value="50">
+                </div>
+                <div class="control-group">
+                    <label>KIỂM SOÁT BẤT ỔN:</label>
+                    <div class="toggle-group">
+                        <button class="sub-btn active">ỔN ĐỊNH</button>
+                        <button class="sub-btn">BẤT ỔN</button>
+                        <button class="sub-btn">HỖN MANG</button>
+                    </div>
+                </div>
+                <button class="action-btn" id="action-biom">BẮT ĐẦU DUNG HỢP</button>
+            </div>
+
+            <!-- TAB 2: ULTIMATESTONE -->
+            <div class="tab-content" id="tab-ultimate">
+                <div class="panel-header"><h3>CƠ THỂ GỐC</h3></div>
+                <div class="gen-list" id="ultimate-gen-list"></div>
+                <div class="control-group">
+                    <label>TỈ LỆ CƠ THỂ:</label>
+                    <input type="range" class="cyber-slider" min="1" max="6" value="3">
+                    <div class="range-labels"><span>Micro</span><span>Bình thường</span><span>Khổng lồ</span></div>
+                </div>
+                <div class="control-group">
+                    <label>HỆ SINH THÁI GIẢ LẬP:</label>
+                    <div class="grid-options">
+                        <button class="grid-btn active">CHIẾN TRANH</button>
+                        <button class="grid-btn">DUNG NHAM</button>
+                        <button class="grid-btn">BĂNG GIÁ</button>
+                        <button class="grid-btn">VỰC THẲM</button>
+                        <button class="grid-btn">HƯ KHÔNG</button>
+                    </div>
+                </div>
+                <button class="action-btn" id="action-ultimate">BẮT ĐẦU ÉP XUNG</button>
+            </div>
+
+            <!-- TAB 3: CHAQUESTONE -->
+            <div class="tab-content" id="tab-chaques">
+                <div class="panel-header"><h3>THỂ GỐC TRIỆU HỒI</h3></div>
+                <div class="gen-list" id="chaques-gen-list"></div>
+                <div class="control-group">
+                    <label>TÍNH CÁCH ĐỒNG HÀNH:</label>
+                    <div class="grid-options col-4" id="waifu-grid">
+                        <button class="grid-btn active" data-desc="Mạnh mẽ, năng động, luôn bảo vệ bạn trước nguy hiểm.">Tomboy</button>
+                        <button class="grid-btn" data-desc="Khó tính bề ngoài nhưng thực ra rất quan tâm và dễ ngại.">Tsundere</button>
+                        <button class="grid-btn" data-desc="Yêu bạn đến mức cực đoan, không từ thủ đoạn để ở bên bạn.">Yandere</button>
+                        <button class="grid-btn" data-desc="Quý phái, tinh tế, mọi cử chỉ đều toát lên sự hoàn mỹ.">Thanh lịch</button>
+                        <button class="grid-btn" data-desc="Quyến rũ, ma mị, hút cạn sinh lực (hoặc ví tiền) của bạn.">Mị yêu</button>
+                        <button class="grid-btn" data-desc="Trưởng thành, che chở, gọi bạn là 'bé cưng'.">Mommy</button>
+                        <button class="grid-btn" data-desc="Dễ đỏ mặt, nói lắp, hay nấp sau lưng bạn.">Nhút nhát</button>
+                        <button class="grid-btn" data-desc="Trang điểm đậm, sành điệu, rất cởi mở và hay trêu chọc bạn.">Gyaru</button>
+                    </div>
+                    <p class="desc-box" id="waifu-desc">Mạnh mẽ, năng động, luôn bảo vệ bạn trước nguy hiểm.</p>
+                </div>
+                <button class="action-btn" id="action-chaques">TRIỆU HỒI ĐỒNG HÀNH</button>
+            </div>
+        </section>
+
+        <!-- CỘT PHẢI (RESULT) -->
+        <section class="col-right" id="col-right">
+            <!-- IDLE STATE -->
+            <div class="state-view active" id="state-idle">
+                <svg class="hologram-pokeball" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="10 5" />
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="var(--primary-color)" stroke-width="1" opacity="0.5" />
+                    <path d="M5 50 H95 M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35 M45 50 A5 5 0 1 0 55 50 A5 5 0 1 0 45 50" fill="none" stroke="var(--primary-color)" stroke-width="2"/>
+                </svg>
+                <p class="blink-text">ĐANG CHỜ LỆNH...</p>
+            </div>
+
+            <!-- LOADING STATE -->
+            <div class="state-view" id="state-loading">
+                <div class="progress-container">
+                    <p class="blink-text">ĐANG PHÂN TÍCH CHUỖI GEN...</p>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="loading-fill"></div>
+                    </div>
+                    <p class="progress-percent" id="loading-percent">0%</p>
+                </div>
+            </div>
+
+            <!-- RESULT STATE -->
+            <div class="state-view result-hologram" id="state-result">
+                <div class="ai-image-frame" id="ai-image-container">
+                    <div class="scanline"></div>
+                    <!-- Ảnh Placeholder Sci-fi -->
+                    <div class="hologram-placeholder" id="ai-image">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 22h20L12 2z"/></svg>
+                        <span>DATA RENDERED</span>
+                    </div>
+                </div>
+                <div class="ai-stats-panel">
+                    <h2 class="result-name" id="result-name">POKEMON_NULL</h2>
+                    <div class="result-types" id="result-types">
+                        <span class="type-badge">DATA</span>
+                    </div>
+                    <div class="stats-bars">
+                        <div class="stat-row"><span>HP</span><div class="bar-bg"><div class="bar-fill" id="stat-hp"></div></div></div>
+                        <div class="stat-row"><span>ATK</span><div class="bar-bg"><div class="bar-fill" id="stat-atk"></div></div></div>
+                        <div class="stat-row"><span>DEF</span><div class="bar-bg"><div class="bar-fill" id="stat-def"></div></div></div>
+                        <div class="stat-row"><span>SP.ATK</span><div class="bar-bg"><div class="bar-fill" id="stat-spatk"></div></div></div>
+                        <div class="stat-row"><span>SP.DEF</span><div class="bar-bg"><div class="bar-fill" id="stat-spdef"></div></div></div>
+                        <div class="stat-row"><span>SPD</span><div class="bar-bg"><div class="bar-fill" id="stat-spd"></div></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
-  </div>
-  
-  <script src="script.js"></script>
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="bottom-btn active" id="mobile-tab-lab">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v10.5L3 19v2h18v-2l-6-6.5V2"/><path d="M8 2h8"/><path d="M3 15h18"/></svg>
+            <span>Phòng Lab</span>
+        </button>
+        <button class="bottom-btn" id="mobile-tab-result">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>Kết Quả</span>
+        </button>
+    </nav>
+
+    <!-- TEMPLATE CHO Ô NẠP GEN -->
+    <template id="gen-input-template">
+        <div class="gen-box">
+            <div class="gen-search">
+                <input type="text" class="poke-input" placeholder="Tên hoặc ID Pokemon...">
+                <button class="dice-btn" title="Random Gen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                </button>
+            </div>
+            <div class="gen-preview">
+                <div class="scanline"></div>
+                <div class="preview-content">
+                    <svg class="default-dna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 4l16 16M4 20L20 4M8 8l8 8M8 16l8-8"/></svg>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
 </body>
 </html>
