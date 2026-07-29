@@ -2,44 +2,39 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PokemonLab - Hệ Thống Quản Lý</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-biostone">
   <div class="app-container">
+    
+    <!-- Phần Header: Tiêu đề và Tabs -->
     <header class="header">
-      <h1 id="app-title">PokemonLab</h1>
-      <!-- Các nút chuyển đổi lõi -->
+      <h1 id="app-title">BIOSTONE</h1>
       <nav class="tabs" role="tablist">
-        <button type="button" class="tab tab-active" role="tab" data-tab="biostone">
-          BIOSTONE
-        </button>
-        <button type="button" class="tab" role="tab" data-tab="ultimatestone">
-          ULTIMATESTONE
-        </button>
-        <button type="button" class="tab" role="tab" data-tab="chaquestone">
-          CHAQUESTONE
-        </button>
+        <button type="button" class="tab active" role="tab" data-tab="biostone">BIOSTONE</button>
+        <button type="button" class="tab" role="tab" data-tab="ultimatestone">ULTIMATESTONE</button>
+        <button type="button" class="tab" role="tab" data-tab="chaquestone">CHAQUESTONE</button>
       </nav>
     </header>
 
-    <main>
-      <!-- Khu vực hiển thị thông tin Pokemon -->
-      <div id="pokemon-display">
-        <!-- Thông số GEN sẽ được render tại đây -->
+    <!-- Phần Nội dung chính -->
+    <main class="main-content">
+      <div class="action-section">
+        <button id="action-btn" class="btn-primary">
+          <span class="btn-text">DUNG HỢP GEN</span>
+        </button>
       </div>
-      
-      <!-- Nút thao tác -->
-      <button id="action-btn" class="btn-primary">
-        <span class="btn-text">TRÍCH XUẤT GEN</span>
-      </button>
+
+      <div class="storage-section">
+        <h2>KHO LƯU TRỮ GEN POKEMON</h2>
+        <div id="pokemon-list" class="pokemon-grid">
+          <!-- Danh sách Pokemon sẽ được JavaScript tạo tự động ở đây -->
+        </div>
+      </div>
     </main>
 
-    <!-- Modal chọn Pokemon -->
-    <div id="selection-modal" class="modal hidden">
-      <h3 id="modalTitle">KHO LƯU TRỮ GEN POKEMON</h3>
-      <div id="pokemon-list" class="grid-list"></div>
-    </div>
   </div>
   
   <script src="script.js"></script>
