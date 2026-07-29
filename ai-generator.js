@@ -1,17 +1,17 @@
 /**
- * MODULE: GEMINI & IMAGE AI INTEGRATION CORE (UPDATED)
+ * MODULE: GEMINI & IMAGE AI INTEGRATION CORE
  */
 const AIGenerator = {
     // 🔑 API Key Google AI Studio của bạn
     apiKey: "AQ.Ab8RN6JhXImix19AEaCoJYyR_DNyBrqoYcmpPJo7Zd05jt_RxA",
 
-    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH
+    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH (CHIA 3 NHÁNH THEO YÊU CẦU)
     buildImagePrompt: function(dnaList, theme, sizeStr, waifuTrait) {
         const validDnas = dnaList.filter(Boolean);
         if (validDnas.length === 0) return "A mysterious glowing egg";
 
         const names = validDnas.map(d => d.name).join(' and ');
-        const types = Array.from(new Set(validDnas.flatMap(d => d.types))).join(', ');
+        const types = validDnas.flatMap(d => d.types).join(', ');
         
         // Phong cách bắt buộc: 2D vector Full HD, đậm chất Pokémon
         const baseStyle = "Authentic official Pokémon art style, 2D vector illustration, Full HD 1080p, flat colors, clean crisp vector lines, solid white background, high quality masterpiece.";
@@ -35,81 +35,28 @@ const AIGenerator = {
         return `${specificPrompt} ${baseStyle}`;
     },
 
-    // 2. THUẬT TOÁN ĐẶT TÊN THÔNG MINH DỰ PHÒNG (LOCAL FALLBACK)
-    generateSmartFallbackName: function(dnaList, theme) {
+    // 2. GỌI GEMINI API ĐỂ SINH LORE CHI TIẾT
+    generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
         const validDnas = dnaList.filter(Boolean);
-        if (validDnas.length === 0) return "UNKNOWN-ENTITY";
-
-        const names = validDnas.map(d => d.name);
-        let fused = "";
-
-        if (names.length === 1) {
-            fused = names[0];
-        } else if (names.length === 2) {
-            // Lấy nửa đầu tên 1 + nửa sau tên 2 (Ví dụ: Pikachu + Mew = Pikew)
-            const p1 = names[0].substring(0, Math.ceil(names[0].length / 2));
-            const p2 = names[1].substring(Math.floor(names[1].length / 2));
-            fused = p1 + p2;
-        } else {
-            // Dung hợp từ 3-5 Pokémon
-            const parts = names.map((n, i) => {
-                if (i === 0) return n.substring(0, Math.min(3, n.length));
-                if (i === names.length - 1) return n.substring(Math.floor(n.length / 2));
-                return n.substring(0, 2);
-            });
-            fused = parts.join('');
-        }
-
-        fused = fused.toUpperCase();
-
-        if (theme === 'ultimate') return `OMEGA ${fused}`;
-        if (theme === 'chaques') return `CHQ-${fused}`;
-        return fused;
-    },
-
-    // 3. GỌI GEMINI API ĐỂ SINH DỮ LIỆU THỰC THỂ (SMART FUSION NAME & LORE THEO ĐẶC TÍNH)
-    generateFusionDataFromAPI: async function(dnaList, theme, waifuTrait) {
-        const validDnas = dnaList.filter(Boolean);
-        if (validDnas.length === 0) {
-            return { name: "KHÔNG XÁC ĐỊNH", lore: "Chưa có mẫu vật DNA." };
-        }
+        if (validDnas.length === 0) return "Chưa có mẫu vật DNA.";
         
         const names = validDnas.map(d => d.name).join(', ');
-        const types = Array.from(new Set(validDnas.flatMap(d => d.types))).join(', ');
-        const fallbackName = this.generateSmartFallbackName(validDnas, theme);
-
+        const types = validDnas.flatMap(d => d.types).join(', ');
+        
         let prompt = "";
 
         if (theme === 'ultimate') {
-            prompt = `Bạn là hệ thống Pokedex Tối Thượng. Hãy phân tích các Pokémon gốc: ${names} (hệ: ${types}).
-1. Sáng tạo 1 tên dung hợp tối thượng mượt mà, uy dũng kết hợp từ tên các Pokémon gốc (Ví dụ: OMEGA PIKEW, CHARSQUIRT OMEGA, hoặc OMEGA + tên ghép).
-2. Viết 1 đoạn mô tả Lore sâu sắc (3 câu) bằng tiếng Việt: Môi trường khắc nghiệt hàng triệu năm ép sinh vật hòa trộn từ ${names} tiến hóa đột biến hình thái tối thượng, kết hợp hoàn hảo đặc tính, kỹ năng cùng hệ ${types}, bộc phát mức độ sức mạnh đột biến lượng tử ở cấp độ tuyệt diệt của Lõi Đá Ultimatestone.
-
-Trả về kết quả chuẩn định dạng JSON duy nhất (không chứa ký tự mã bọc ```json...```) như sau:
-{"name": "TÊN_DUNG_HỢP", "lore": "NỘI_DUNG_LORE"}`;
+            prompt = `Bạn là hệ thống Pokedex tối thượng. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} bị ép phải tiến hóa đột biến trong môi trường khắc nghiệt trong thời gian hàng triệu năm để đạt được sức mạnh hủy diệt của hệ ${types}. Không giải thích thêm.`;
         
         } else if (theme === 'chaques') {
-            prompt = `Bạn là hệ thống Pokedex Chaquetrix. Hãy phân tích các Pokémon gốc: ${names} (hệ: ${types}).
-1. Sáng tạo 1 tên dung hợp mượt mà, độc đáo phong cách nữ chiến binh anime (Ví dụ: CHQ-PIKEW, CHARSQUIRTIA, CHQ-${validDnas[0].name}).
-2. Viết 1 đoạn mô tả Lore sâu sắc (3 câu) bằng tiếng Việt: Năng lượng Lõi Đá Chaquestone tái tạo DNA của ${names} thành một nữ chiến binh dạng người (humanoid) mang tính cách ${waifuTrait}. Cô hòa trộn ngoại hình, đặc tính, kỹ năng cùng hệ ${types} của các Pokémon gốc, thể hiện mức độ sức mạnh đột biến đỉnh cao sẵn sàng đồng hành bảo vệ người chơi.
-
-Trả về kết quả chuẩn định dạng JSON duy nhất (không chứa ký tự mã bọc ```json...```) như sau:
-{"name": "TÊN_DUNG_HỢP", "lore": "NỘI_DUNG_LORE"}`;
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} được áp dụng năng lượng Chaquestone để tạo thành 1 nữ chiến binh dạng cơ thể người. Cô ấy có tính cách ${waifuTrait}, dùng kỹ năng hệ ${types} để sát cánh và đồng hành bảo vệ người chơi. Không giải thích thêm.`;
         
         } else {
-            // Biomstone
-            prompt = `Bạn là hệ thống Pokedex Lượng Tử. Hãy phân tích các Pokémon gốc: ${names} (hệ: ${types}).
-1. Sáng tạo 1 tên dung hợp (Smart Fusion Name) độc đáo, cực kỳ mượt mà bằng cách phân tích và ghép các âm tiết từ tên các Pokémon gốc (Ví dụ: Pikachu + Mew = Pikew; Charmander + Squirtle = Charsquirt; Charizard + Lucario = Charcario).
-2. Viết 1 đoạn mô tả Lore sâu sắc (3 câu) bằng tiếng Việt: "Sự kết hợp năng lượng Lõi Đá Biomstone từ ${names} tạo ra một sinh vật mới mang hình thái hòa trộn dựa trên đặc tính, kỹ năng và hệ ${types} của các Pokémon gốc. Nó bộc phát mức độ sức mạnh đột biến lượng tử đa hệ vượt trội...".
-
-Trả về kết quả chuẩn định dạng JSON duy nhất (không chứa ký tự mã bọc ```json...```) như sau:
-{"name": "TÊN_DUNG_HỢP", "lore": "NỘI_DUNG_LORE"}`;
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt theo cấu trúc sau: "Sự kết hợp của ${names} tạo ra một sinh vật mới mang hình thái hòa trộn dựa trên đặc tính và kĩ năng của các Pokémon gốc. Nó sở hữu sức mạnh đột biến của hệ ${types}...". Hãy viết thật ngầu và không giải thích thêm.`;
         }
 
-        const fallbackLore = `Sự kết hợp của ${names} tạo ra sinh vật mới mang hình thái hòa trộn dựa trên đặc tính, kỹ năng và hệ ${types} của các Pokémon gốc, bộc phát mức độ sức mạnh đột biến lượng tử ấn tượng.`;
-
         if (!this.apiKey || this.apiKey === "YOUR_AI_STUDIO_API_KEY_HERE") {
-            return { name: fallbackName, lore: `[Giả lập]: ${fallbackLore}` };
+            return `[Giả lập]: Lore của ${names} hệ ${types}. Đang chờ kết nối API.`;
         }
 
         try {
@@ -118,43 +65,26 @@ Trả về kết quả chuẩn định dạng JSON duy nhất (không chứa ký
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-            
             const data = await response.json();
             if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-                let rawText = data.candidates[0].content.parts[0].text.trim();
-                // Bóc tách Markdown JSON nếu có
-                rawText = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
-                
-                try {
-                    const parsed = JSON.parse(rawText);
-                    if (parsed.name && parsed.lore) {
-                        return { name: parsed.name.toUpperCase(), lore: parsed.lore };
-                    }
-                } catch (e) {
-                    return { name: fallbackName, lore: rawText };
-                }
+                return data.candidates[0].content.parts[0].text.trim();
             }
-            return { name: fallbackName, lore: fallbackLore };
+            return "Hệ thống lượng tử phản hồi dữ liệu trống.";
         } catch (error) {
             console.error("Lỗi Gemini API:", error);
-            return { name: fallbackName, lore: `Đã xảy ra lỗi kết nối đa vũ trụ khi truy xuất thông tin của ${names}.` };
+            return `Đã xảy ra lỗi kết nối sóng tâm linh khi truy xuất thông tin của ${names}.`;
         }
     },
 
-    // Alias tương thích cũ
-    generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
-        const res = await this.generateFusionDataFromAPI(dnaList, theme, waifuTrait);
-        return res.lore;
-    },
-
+    // Alias tương thích
     buildLorePrompt: async function(dnaList, theme, waifuTrait) {
         return await this.generateLoreFromAPI(dnaList, theme, waifuTrait);
     },
 
-    // 4. TẠO URL ẢNH AI
+    // 3. TẠO URL ẢNH AI
     generateImageFromAPI: function(promptText) {
         const seed = Math.floor(Math.random() * 1000000);
         const encodedPrompt = encodeURIComponent(promptText);
-        return `[https://image.pollinations.ai/prompt/$](https://image.pollinations.ai/prompt/$){encodedPrompt}?width=512&height=512&seed=${seed}&model=anime&nologo=true&enhance=false`;
+        return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${seed}&model=anime&nologo=true&enhance=false`;
     }
 };
