@@ -1,12 +1,35 @@
 /**
- * MODULE: GEMINI API INTEGRATION CORE (GitHub Pages Version)
- * Chuyên trách kết nối trực tiếp với Google Gemini API cho Text & Prompt Generation.
+ * MODULE: GEMINI & IMAGE AI INTEGRATION CORE
+ * Chuyên trách suy luận prompt, kết nối Gemini API cho Text & Gọi AI sinh ảnh.
  */
 const AIGenerator = {
-    // 🔑 Dán API Key lấy từ Google AI Studio của bạn vào đây
+    // 🔑 API Key Google AI Studio của bạn
     apiKey: "AQ.Ab8RN6JhXImix19AEaCoJYyR_DNyBrqoYcmpPJo7Zd05jt_RxA",
 
-    // 1. GỌI GEMINI API ĐỂ SINH LORE ĐỘC BẢN CHO POKEMON LAI
+    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH (IMAGE PROMPT REASONING)
+    buildImagePrompt: function(dnaList, theme, sizeStr, waifuTrait) {
+        const validDnas = dnaList.filter(Boolean);
+        if (validDnas.length === 0) return "A mysterious glowing cyberpunk creature egg";
+
+        const names = validDnas.map(d => d.name).join(' and ');
+        const types = validDnas.flatMap(d => d.types).join(', ');
+        
+        let styleDesc = "Masterpiece 2D anime style, official Pokemon artwork, clean line art, vibrant lighting, centered view, highly detailed.";
+        
+        if (theme === 'ultimate') {
+            styleDesc += ` An apocalyptic mutated biomechanical titan creature, hybrid fusion of ${names}, elemental powers of ${types}, glowing neon red eyes, heavy armor plating, size: ${sizeStr}.`;
+        } else if (theme === 'biom') {
+            styleDesc += ` A seamless genetic mutated hybrid pokemon organism fusing traits of ${names}, elemental aura of ${types}, organic cybernetic details, size: ${sizeStr}.`;
+        } else if (theme === 'chaques') {
+            styleDesc += ` A sleek high-tech anime mecha musume waifu warrior inspired by ${names}, personality: ${waifuTrait}, wearing glowing elemental armor, size: ${sizeStr}.`;
+        } else {
+            styleDesc += ` Cybernetic hybrid pokemon creature inspired by ${names}.`;
+        }
+        
+        return styleDesc;
+    },
+
+    // 2. GỌI GEMINI API ĐỂ SINH LORE / BÁCH KHOA THƯ (TEXT GENERATION)
     generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
         const validDnas = dnaList.filter(Boolean);
         if (validDnas.length === 0) {
@@ -14,15 +37,15 @@ const AIGenerator = {
         }
         
         const names = validDnas.map(d => d.name).join(', ');
+        const types = validDnas.flatMap(d => d.types).join(', ');
         
-        const prompt = `Bạn là một kỹ sư sinh học viễn tưởng trong một phòng thí nghiệm cyberpunk. 
-        Hãy viết một đoạn bách khoa thư ngắn gọn (từ 2 đến 3 câu độc đáo) mô tả một sinh vật lai tạo từ các mẫu vật: ${names}. 
-        Chủ đề hệ thống: ${theme.toUpperCase()}. Đặc trưng tính cách/ngoại hình: ${waifuTrait}. 
-        CẤM lặp lại văn mẫu. Tập trung vào dị tật cơ thể, thói quen kỳ lạ hoặc khả năng chiến đấu thực chiến. Chỉ trả về kết quả đoạn văn mô tả bằng tiếng Việt, không kèm giải thích thêm.`;
+        const prompt = `Bạn là một kỹ sư sinh học viễn tưởng trong phòng thí nghiệm cyberpunk.
+Hãy viết một đoạn bách khoa thư Pokédex ngắn gọn (từ 2 đến 3 câu) mô tả sinh vật lai tạo đột biến từ các mẫu vật: ${names} (thuộc hệ ${types}).
+Chủ đề dung hợp: ${theme.toUpperCase()}. Tính cách/Đặc trưng: ${waifuTrait}.
+Tập trung vào đặc điểm sinh học, kỹ năng chiến đấu hoặc dị tật năng lượng. Viết hoàn toàn bằng tiếng Việt, giọng văn khoa học ngầu, không giải thích thêm.`;
 
-        // Kiểm tra nếu chưa thay API Key
-        if (this.apiKey === "YOUR_AI_STUDIO_API_KEY_HERE" || !this.apiKey) {
-            return `[Chế độ giả lập an toàn]: Chủ thể lai tạo từ ${names} hiển thị cấu trúc tế bào đột biến dưới giao thức ${theme.toUpperCase()}. Hãy cập nhật API Key chính thức trong tệp ai-generator.js để kích hoạt trí tuệ nhân tạo lượng tử.`;
+        if (!this.apiKey || this.apiKey === "YOUR_AI_STUDIO_API_KEY_HERE") {
+            return `[Chế độ giả lập]: Sinh vật lai tạo từ ${names} mang năng lượng đột biến thuộc hệ ${types}. Cập nhật API Key để kích hoạt Trí tuệ Lượng tử.`;
         }
 
         try {
@@ -34,41 +57,35 @@ const AIGenerator = {
                 })
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             
             if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
                 return data.candidates[0].content.parts[0].text.trim();
             } else {
-                return "Hệ thống lượng tử phản hồi dữ liệu trống hoặc không hợp lệ.";
+                return "Hệ thống lượng tử phản hồi dữ liệu trống.";
             }
         } catch (error) {
-            console.error("Lỗi khi kết nối Gemini API:", error);
-            return "Lỗi kết nối lượng tử: Không thể truyền tải dữ liệu sinh học từ máy chủ trung tâm. Vui lòng kiểm tra lại đường truyền mạng hoặc khóa bảo mật.";
+            console.error("Lỗi Gemini API:", error);
+            return `Sinh vật lai tạo phức hợp giữa ${names}, kết hợp sức mạnh thần bí và công nghệ lượng tử cyberpunk.`;
         }
     },
 
-    // 2. XÂY DỰNG THÔNG SỐ PROMPT HÌNH ẢNH HIỂN THỊ
-    buildImagePrompt: function(dnaList, theme, sizeStr, waifuTrait) {
-        const validDnas = dnaList.filter(Boolean);
-        const primaryName = validDnas[0] ? validDnas[0].name : "UNKNOWN";
-        const names = validDnas.map(d => d.name).join(' + ');
-        
-        let styleDesc = "High quality 2D Anime style illustration, official Pokemon artwork style, clean line art, vivid cyberpunk lighting, pure black background.";
-        
-        if (theme === 'ultimate') {
-            styleDesc += ` Apocalyptic mutated oversized biomechanical creature inspired by ${names}, glowing red optics, heavy armor plates.`;
-        } else if (theme === 'biom') {
-            styleDesc += ` Seamless genetic fusion hybrid creature combining traits of ${names}, organic cybernetics.`;
-        } else if (theme === 'chaques') {
-            styleDesc += ` High-tech anime mecha musume warrior inspired by ${names}, expression: ${waifuTrait}, tactical glowing neon suit.`;
-        } else {
-            styleDesc += ` Cybernetic hybrid pokemon fusion creature inspired by ${names}.`;
+    // Alias hỗ trợ gọi tương thích
+    buildLorePrompt: async function(dnaList, theme, waifuTrait) {
+        return await this.generateLoreFromAPI(dnaList, theme, waifuTrait);
+    },
+
+    // 3. TẠO ẢNH DỰA TRÊN PROMPT SUY LUẬN (IMAGE GENERATION)
+    generateImageFromAPI: async function(promptText) {
+        try {
+            // Tự động tạo URL Render ảnh chất lượng cao từ Prompt được hệ thống suy luận
+            const seed = Math.floor(Math.random() * 1000000);
+            const encodedPrompt = encodeURIComponent(promptText);
+            return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${seed}&nologo=true&enhance=true`;
+        } catch (e) {
+            console.error("Lỗi sinh ảnh AI:", e);
+            return null;
         }
-        
-        return styleDesc;
     }
 };
