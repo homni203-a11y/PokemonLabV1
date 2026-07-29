@@ -1,91 +1,86 @@
 /**
  * MODULE: GEMINI & IMAGE AI INTEGRATION CORE
- * Chuyên trách suy luận prompt, kết nối Gemini API cho Text & Gọi AI sinh ảnh.
  */
 const AIGenerator = {
     // 🔑 API Key Google AI Studio của bạn
     apiKey: "AQ.Ab8RN6JhXImix19AEaCoJYyR_DNyBrqoYcmpPJo7Zd05jt_RxA",
 
-    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH (IMAGE PROMPT REASONING)
+    // 1. TỰ ĐỘNG SUY LUẬN PROMPT MÔ TẢ HÌNH ẢNH (CHIA 3 NHÁNH)
     buildImagePrompt: function(dnaList, theme, sizeStr, waifuTrait) {
         const validDnas = dnaList.filter(Boolean);
-        if (validDnas.length === 0) return "A mysterious glowing cyberpunk creature egg";
+        if (validDnas.length === 0) return "A mysterious glowing egg";
 
         const names = validDnas.map(d => d.name).join(' and ');
         const types = validDnas.flatMap(d => d.types).join(', ');
         
-        let styleDesc = "Masterpiece 2D anime style, official Pokemon artwork, clean line art, vibrant lighting, centered view, highly detailed.";
+        // Cốt lõi phong cách hình ảnh (Bắt buộc 2D Vector, Full HD, chuẩn Pokemon)
+        const baseStyle = "Authentic official Pokémon art style, 2D vector illustration, Full HD 1080p, flat colors, clean crisp vector lines, solid white background, high quality masterpiece.";
         
+        let specificPrompt = "";
+
         if (theme === 'ultimate') {
-            styleDesc += ` An apocalyptic mutated biomechanical titan creature, hybrid fusion of ${names}, elemental powers of ${types}, glowing neon red eyes, heavy armor plating, size: ${sizeStr}.`;
-        } else if (theme === 'biom') {
-            styleDesc += ` A seamless genetic mutated hybrid pokemon organism fusing traits of ${names}, elemental aura of ${types}, organic cybernetic details, size: ${sizeStr}.`;
+            // Prompt cho Ultimatestone (Ép tiến hóa)
+            const env = types.includes('Fire') ? "magma core" : types.includes('Water') ? "abyssal trench" : "harsh radioactive apocalyptic";
+            specificPrompt = `An ultimate mutated form of Pokémon ${names}. It was forced to evolve over thousands of years in a ${env} environment to achieve ultimate god-like power. Highly intimidating, glowing elemental aura of ${types}, complex monster design, size: ${sizeStr}.`;
+        
         } else if (theme === 'chaques') {
-            styleDesc += ` A sleek high-tech anime mecha musume waifu warrior inspired by ${names}, personality: ${waifuTrait}, wearing glowing elemental armor, size: ${sizeStr}.`;
+            // Prompt cho Chaquestone (Waifu đồng hành)
+            specificPrompt = `Humanoid female anthropomorphic version of Pokémon ${names}. A beautiful anime girl companion working alongside the player. She has a ${waifuTrait} personality. Wearing a stylish outfit inspired by ${names} and ${types} types. Beautiful face, expressive eyes, size: ${sizeStr}.`;
+        
         } else {
-            styleDesc += ` Cybernetic hybrid pokemon creature inspired by ${names}.`;
+            // Prompt cho Biomstone (Dung hợp)
+            specificPrompt = `A seamless hybrid fusion Pokémon combining the DNA of ${names}. Blending their physical traits and ${types} elemental features harmoniously. New unique Pokémon species, size: ${sizeStr}.`;
         }
         
-        return styleDesc;
+        return `${specificPrompt} ${baseStyle}`;
     },
 
-    // 2. GỌI GEMINI API ĐỂ SINH LORE / BÁCH KHOA THƯ (TEXT GENERATION)
+    // 2. GỌI GEMINI API ĐỂ SINH LORE DỰA TRÊN TỪNG LOẠI ĐÁ
     generateLoreFromAPI: async function(dnaList, theme, waifuTrait) {
         const validDnas = dnaList.filter(Boolean);
-        if (validDnas.length === 0) {
-            return "Chưa có mẫu vật DNA nào được nạp vào buồng lai tạo.";
-        }
+        if (validDnas.length === 0) return "Chưa có mẫu vật DNA.";
         
         const names = validDnas.map(d => d.name).join(', ');
         const types = validDnas.flatMap(d => d.types).join(', ');
         
-        const prompt = `Bạn là một kỹ sư sinh học viễn tưởng trong phòng thí nghiệm cyberpunk.
-Hãy viết một đoạn bách khoa thư Pokédex ngắn gọn (từ 2 đến 3 câu) mô tả sinh vật lai tạo đột biến từ các mẫu vật: ${names} (thuộc hệ ${types}).
-Chủ đề dung hợp: ${theme.toUpperCase()}. Tính cách/Đặc trưng: ${waifuTrait}.
-Tập trung vào đặc điểm sinh học, kỹ năng chiến đấu hoặc dị tật năng lượng. Viết hoàn toàn bằng tiếng Việt, giọng văn khoa học ngầu, không giải thích thêm.`;
+        let prompt = "";
+
+        if (theme === 'ultimate') {
+            prompt = `Bạn là hệ thống Pokedex tối thượng. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} bị ép phải tiến hóa đột biến trong môi trường khắc nghiệt nhất trong thời gian hàng triệu năm để đạt được sức mạnh hủy diệt của hệ ${types}. Không giải thích thêm.`;
+        
+        } else if (theme === 'chaques') {
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt: Pokémon ${names} được áp dụng năng lượng Chaquestone để tạo thành 1 nữ chiến binh dạng cơ thể người. Cô ấy có tính cách ${waifuTrait}, dùng kỹ năng hệ ${types} để sát cánh và đồng hành bảo vệ người chơi. Không giải thích thêm.`;
+        
+        } else {
+            prompt = `Bạn là hệ thống Pokedex. Hãy viết 1 đoạn mô tả (khoảng 3 câu) bằng tiếng Việt theo cấu trúc sau: "Sự kết hợp của ${names} tạo ra một sinh vật mới mang hình thái hòa trộn dựa trên đặc tính và kĩ năng của các Pokémon gốc. Nó sở hữu sức mạnh đột biến của hệ ${types}...". Hãy viết thật ngầu và không giải thích thêm.`;
+        }
 
         if (!this.apiKey || this.apiKey === "YOUR_AI_STUDIO_API_KEY_HERE") {
-            return `[Chế độ giả lập]: Sinh vật lai tạo từ ${names} mang năng lượng đột biến thuộc hệ ${types}. Cập nhật API Key để kích hoạt Trí tuệ Lượng tử.`;
+            return `[Giả lập]: Lore của ${names} hệ ${types}. Đang chờ kết nối API.`;
         }
 
         try {
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            
             if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
                 return data.candidates[0].content.parts[0].text.trim();
-            } else {
-                return "Hệ thống lượng tử phản hồi dữ liệu trống.";
             }
+            return "Hệ thống lượng tử phản hồi dữ liệu trống.";
         } catch (error) {
             console.error("Lỗi Gemini API:", error);
-            return `Sinh vật lai tạo phức hợp giữa ${names}, kết hợp sức mạnh thần bí và công nghệ lượng tử cyberpunk.`;
+            return `Đã xảy ra lỗi kết nối sóng tâm linh khi truy xuất thông tin của ${names}.`;
         }
     },
 
-    // Alias hỗ trợ gọi tương thích
-    buildLorePrompt: async function(dnaList, theme, waifuTrait) {
-        return await this.generateLoreFromAPI(dnaList, theme, waifuTrait);
-    },
-
-    // 3. TẠO ẢNH DỰA TRÊN PROMPT SUY LUẬN (IMAGE GENERATION)
-    generateImageFromAPI: async function(promptText) {
-        try {
-            // Tự động tạo URL Render ảnh chất lượng cao từ Prompt được hệ thống suy luận
-            const seed = Math.floor(Math.random() * 1000000);
-            const encodedPrompt = encodeURIComponent(promptText);
-            return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${seed}&nologo=true&enhance=true`;
-        } catch (e) {
-            console.error("Lỗi sinh ảnh AI:", e);
-            return null;
-        }
+    // 3. TẠO URL ẢNH
+    generateImageFromAPI: function(promptText) {
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(promptText);
+        // model=anime giúp tạo nét 2D tốt hơn trên pollinations
+        return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&seed=${seed}&model=anime&nologo=true&enhance=false`;
     }
 };
