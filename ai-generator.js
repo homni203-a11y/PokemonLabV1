@@ -1,112 +1,59 @@
 /**
- * AI GENERATOR MODULE
- * Xử lý logic dung hợp gen động (Nội suy thông số, Đặt tên, Cốt truyện, Prompt tạo ảnh)
+ * MODULE: AI PROMPT ENGINEER CORE
+ * Chịu trách nhiệm thiết kế cấu trúc lệnh chuẩn gửi cho Text & Image API
  */
-
 const AIGenerator = {
-    // 1. Phân tích & Trộn Chỉ Số (HP, ATK, DEF, SP.ATK, SP.DEF, SPD)
-    generateStats: function(stats1, stats2, ratio = 0.5) {
-        if(!stats2) return stats1; // Nếu chỉ có 1 cơ thể
-        let newStats = {};
-        const statKeys = ['hp', 'atk', 'def', 'spAtk', 'spDef', 'spd'];
-        const s1 = JSON.parse(stats1);
-        const s2 = JSON.parse(stats2);
+    // 1. CHUẨN HÓA LẠI IMAGE PROMPT (GIẢI QUYẾT LỖI PIXEL ART)
+    buildImagePrompt: function(dna1, dna2, theme, sizeStr, waifuTrait) {
+        // Bắt buộc từ khóa chất lượng cao
+        const baseStyle = "High quality 2D Anime style, highly detailed illustration, studio quality, FHD, flat color shading, Pokemon official artwork style, dynamic pose, pure black background.";
         
-        statKeys.forEach((key, i) => {
-            // Nội suy theo tỷ lệ (mặc định 50-50, hoặc nghiêng về Main)
-            let val = Math.floor((s1[i] * ratio) + (s2[i] * (1 - ratio)));
-            // Tính toán thêm "đột biến" (Random +- 10%)
-            const mutation = val * (Math.random() * 0.2 - 0.1); 
-            // Scale bar cho đẹp (Max 150)
-            newStats[key] = Math.min(100, Math.max(10, ((val + mutation) / 150) * 100)); 
-        });
-        return newStats;
+        let visualDesc = "";
+        if (theme === 'ultimate') {
+            visualDesc = `A mutated, extremely powerful oversized version of ${dna1.name}, bursting with elemental energy, glowing aura, menacing eyes, epic sci-fi armor parts.`;
+        } else if (theme === 'biom') {
+            visualDesc = `A flawless genetic fusion of ${dna1.name} and ${dna2.name}. Combining body structure and elemental types (${dna1.types.join(',')} and ${dna2.types.join(',')}), seamless hybrid creature.`;
+        } else if (theme === 'chaques') {
+            visualDesc = `A beautiful anime girl wearing a high-tech sci-fi suit heavily inspired by the pokemon ${dna1.name}. She has a ${waifuTrait} expression and posture. Mecha musume style, neon accents.`;
+        }
+
+        return `${baseStyle} ${visualDesc}`;
     },
 
-    // 2. Sinh Tên Mới
-    generateName: function(name1, name2, theme) {
-        const prefixes = ['Cyber', 'Neo', 'Mecha', 'Giga', 'Omni'];
-        const pfx = prefixes[Math.floor(Math.random() * prefixes.length)];
+    // 2. CHUẨN HÓA TEXT LORE (TIẾN SĨ SINH HỌC POKEMON)
+    buildLorePrompt: function(dna1, dna2, theme, waifuTrait) {
+        // Hệ thống sẽ gửi đoạn system prompt này cho API Text (OpenAI/Gemini)
+        // Dưới đây là bộ khung (Framework) bắt buộc để AI không viết lặp lại văn mẫu.
         
-        if(!name2) return `${pfx}-${name1.toUpperCase()}`; // Ultimate/Chaques
+        const systemRole = "Bạn là Giáo sư Lượng Tử, một chuyên gia sinh học Pokemon. Hãy viết 1 đoạn mô tả (tối đa 4 câu) bằng tiếng Việt cực kỳ sáng tạo, KHÔNG LẶP LẠI.";
         
-        // Cắt nửa tên Biom
-        const part1 = name1.substring(0, Math.ceil(name1.length/2));
-        const part2 = name2.substring(Math.floor(name2.length/2));
-        return `${pfx}-${part1}${part2}`.toUpperCase();
+        let context = "";
+        if (theme === 'ultimate') {
+            context = `Mô tả về sự tiến hóa ép xung của ${dna1.name}. Tập trung miêu tả: 1 đặc điểm cơ thể bị phóng đại, 1 hiện tượng vật lý kỳ lạ xảy ra xung quanh nó khi nổi giận, và mức độ tàn phá môi trường tự nhiên.`;
+        } else if (theme === 'biom') {
+            context = `Mô tả về sinh vật lai tạo giữa ${dna1.name} và ${dna2.name}. Tập trung miêu tả: Vũ khí đặc trưng hình thành từ sự kết hợp gen, cách nó săn mồi độc đáo, hoặc một lỗ hổng trong cấu trúc sinh học.`;
+        } else if (theme === 'chaques') {
+            context = `Mô tả về một nữ chiến binh nhân tạo mang mã gen ${dna1.name} và có tính cách [${waifuTrait}]. Tập trung miêu tả: Thói quen/hành động đặc trưng của cô ấy với chủ nhân, cách cô ấy sử dụng năng lượng hệ ${dna1.types.join(',')} trong chiến đấu.`;
+        }
+
+        // Để test giao diện mà không cần API key thực, ta sẽ viết một hàm giả lập LLM cực xịn ở đây:
+        return this.mockLLMResponse(theme, dna1, dna2, waifuTrait);
     },
 
-    // 3. Sinh Tiểu Sử / Đặc tính Sinh học
-    generateDescription: function(typesArr, theme) {
-        const typesStr = typesArr.join(" và ");
-        if(theme === 'biom') return `Sinh vật lai tạo mang đặc tính gen hệ ${typesStr}. Cấu trúc cơ thể được tái tổ hợp, sở hữu khả năng thích nghi cao trong môi trường khắc nghiệt nhờ chuỗi DNA lai chéo 2 chiều.`;
-        if(theme === 'ultimate') return `Hệ gen thuần túy hệ ${typesStr} đã vượt qua giới hạn sinh học, được Ép Xung để giải phóng lõi năng lượng lượng tử, mang lại sức mạnh tàn phá vượt trội.`;
-        return `Đồng hành nhân tạo được triệu hồi từ dữ liệu hệ ${typesStr}. Giao thức tình cảm được tối ưu hóa, đảm bảo độ trung thành tuyệt đối và hỗ trợ tác chiến chiến thuật.`;
-    },
-
-    // 4. Viết Prompt tự động gửi API (Midjourney/Dall-E)
-    generatePrompt: function(name1, name2, config) {
-        let prompt = "A highly detailed, ultra-realistic masterpiece, cyberpunk style pokemon, ";
-        if(config.theme === 'biom') {
-            prompt += `fusion of ${name1} and ${name2}, mechanical parts, neon lights glowing, hybrid creature, bioluminescence, 8k resolution, volumetric lighting, dark sci-fi background.`;
-        } else if(config.theme === 'ultimate') {
-            prompt += `mutated massive ${name1}, overloaded with raw energy, glowing aura, hyper-aggressive stance, cinematic lighting, 8k, mechanical armor plates.`;
+    mockLLMResponse: function(theme, p1, p2, waifu) {
+        const hienTuong = ["làm bốc hơi hơi ẩm trong không khí", "bẻ cong không gian xung quanh", "phát ra sóng điện từ làm nhiễu radar", "khiến cỏ cây xung quanh héo úa ngay lập tức"];
+        const vuKhi = ["lưỡi dao sinh học sắc bén", "lõi năng lượng rực sáng trước ngực", "cặp sừng hấp thụ tinh tú", "chiếc đuôi chứa dung dịch axit quang học"];
+        
+        if (theme === 'ultimate') {
+            return `Báo cáo nghiên cứu: Thể đột biến của ${p1.name} đã vượt ngưỡng an toàn. Lớp da bên ngoài bong tróc để lộ những ${vuKhi[Math.floor(Math.random()*4)]}. Mỗi khi nó di chuyển, năng lượng khổng lồ rò rỉ ra ngoài ${hienTuong[Math.floor(Math.random()*4)]}. Mức độ thảm họa cấp S.`;
+        } else if (theme === 'biom') {
+            return `Kết quả cấy ghép chéo: Con lai kế thừa bản tính hung hăng của ${p1.name} và cấu trúc của ${p2.name}. Chúng săn mồi bằng cách sử dụng ${vuKhi[Math.floor(Math.random()*4)]}. Các tài liệu ghi nhận sinh vật này có tập tính ngụy trang cực kỳ tinh vi trong đêm.`;
         } else {
-            const waifuTrait = document.querySelector('#waifu-grid .active').innerText;
-            prompt += `anime style waifu heavily inspired by ${name1}, ${waifuTrait} traits, sci-fi mechanical bodysuit, neon accents, beautiful face, highly detailed, dramatic lighting.`;
+            const hanhDong = waifu === 'MOMMY' ? "luôn muốn ôm bạn vào lòng để bảo vệ khỏi sát thương vật lý" : 
+                             waifu === 'TSUNDERE' ? "thường xuyên phàn nàn về mệnh lệnh nhưng luôn hoàn thành nhiệm vụ xuất sắc" :
+                             waifu === 'YANDERE' ? "sẽ lập tức thiêu rụi bất cứ ai dám đến gần bạn với ý đồ xấu" : 
+                             "luôn duy trì liên kết thần kinh để hỗ trợ chiến thuật";
+            return `Mẫu vật nữ mang gen ${p1.name}. Đặc điểm nhận dạng: Tính cách ${waifu.toLowerCase()}, ${hanhDong}. Bộ giáp sinh học của cô ấy có thể ${hienTuong[Math.floor(Math.random()*4)]} khi bước vào trạng thái bảo vệ chủ nhân.`;
         }
-        console.log("SEND THIS PROMPT TO MIDJOURNEY/DALL-E: ", prompt);
-        return prompt;
-    },
-
-    // MAIN EXECUTION
-    processFusion: function(tabName, loadedBoxes) {
-        const p1 = loadedBoxes[0].dataset;
-        const p2 = loadedBoxes.length > 1 ? loadedBoxes[1].dataset : null;
-        
-        // Xác định tỷ lệ trộn dựa vào UI
-        let ratio = 0.5;
-        if(tabName === 'biom') {
-            const isBalance = document.querySelector('#mix-mode-toggle button[data-mode="can-bang"]').classList.contains('active');
-            if(isBalance) {
-                ratio = document.querySelector('.cyber-slider').value / 100;
-            } else {
-                ratio = document.getElementById('btn-main-1').classList.contains('active') ? 0.8 : 0.2; // Main/Sub ratio
-            }
-        }
-
-        // Tạo dữ liệu
-        const name = this.generateName(p1.pokeName, p2 ? p2.pokeName : null, tabName);
-        const types = [...new Set(p1.pokeTypes.split(',').concat(p2 ? p2.pokeTypes.split(',') : []))];
-        const stats = this.generateStats(p1.pokeStats, p2 ? p2.pokeStats : null, ratio);
-        const desc = this.generateDescription(types, tabName);
-        
-        // Tạo Prompt
-        this.generatePrompt(p1.pokeName, p2 ? p2.pokeName : null, {theme: tabName});
-
-        // Tạo Fake Image (Sử dụng Image gốc của Con 1 tạm thời - trong thực tế sẽ gán URL từ API trả về)
-        const fakeResultImg = document.querySelector(`#${loadedBoxes[0].id} img`).src;
-
-        // Lưu vào State và Render
-        TabManager.states[tabName].resultData = { name, types, desc, stats, img: fakeResultImg };
-        TabManager.states[tabName].status = 'result';
-        
-        // Reset Box UI Level Color
-        loadedBoxes.forEach(box => {
-            box.querySelectorAll('.lvl-box').forEach(l => {l.style.background='transparent'; l.style.boxShadow='none';});
-            const lvls = box.querySelectorAll('.lvl-box');
-            if(lvls.length>0) {
-               lvls[Math.floor(Math.random()*5)].style.background = 'var(--primary-color)';
-            }
-        });
-
-        TabManager.renderRightColumn();
-        
-        // Xử lý Animation Bar-fill mượt mà
-        setTimeout(() => {
-            const rData = TabManager.states[tabName].resultData.stats;
-            const bars = document.querySelectorAll('.state-view.active .bar-fill');
-            Object.values(rData).forEach((val, i) => { if(bars[i]) bars[i].style.width = val + '%'; });
-        }, 100);
     }
 };
