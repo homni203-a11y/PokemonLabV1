@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Gen Pokemon</title>
+    <title>Hệ Thống Gen Pokemon V2</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-biom">
-    <!-- BACKGROUND GRID -->
     <div class="bg-grid"></div>
 
     <!-- HEADER -->
@@ -19,28 +18,30 @@
             <h1 id="core-title">LÕI ĐÁ BIOM</h1>
         </div>
         <div class="header-right">
-            <button class="nav-btn">
+            <button class="nav-btn" onclick="UI_MODAL.open('modal-pokedex')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                <span>POKÉDEX</span>
+            </button>
+            <button class="nav-btn" onclick="UI_MODAL.open('modal-settings')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span>CÀI ĐẶT</span>
             </button>
-            <button class="nav-btn">
+            <button class="nav-btn" onclick="UI_MODAL.showToast('Tính năng Đấu Trường đang trong quá trình phát triển 🚧')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 17.5L3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2M15 3h6v6M10 14L2.1 21.9"/></svg>
                 <span>ĐẤU TRƯỜNG</span>
             </button>
-            <button class="nav-btn">
+            <button class="nav-btn" onclick="UI_MODAL.openCollection()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 <span>BỘ SƯU TẬP</span>
             </button>
-            <button class="nav-btn">
+            <button class="nav-btn" id="btn-cycle-core">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                 <span>ĐỔI LÕI</span>
             </button>
         </div>
     </header>
 
-    <!-- MAIN LAYOUT -->
     <main class="main-container">
-        
         <!-- CỘT TRÁI (CONTROLS) -->
         <section class="col-left active" id="col-left">
             <div class="tabs">
@@ -53,15 +54,18 @@
             <div class="tab-content active" id="tab-biom">
                 <div class="panel-header">
                     <h3>THIẾT LẬP DUNG HỢP</h3>
-                    <div class="counter-control">
-                        <button id="btn-sub-gen">-</button>
-                        <span id="gen-count-display">2</span>
-                        <button id="btn-add-gen">+</button>
+                    <div class="header-actions">
+                        <button class="dice-btn" title="Lấp đầy ngẫu nhiên" onclick="AppLogic.rollDice('biom')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                        </button>
+                        <div class="counter-control">
+                            <button id="btn-sub-gen">-</button>
+                            <span id="gen-count-display">2</span>
+                            <button id="btn-add-gen">+</button>
+                        </div>
                     </div>
                 </div>
-                <div class="gen-list" id="biom-gen-list">
-                    <!-- JS sẽ render ô nạp gen tại đây -->
-                </div>
+                <div class="gen-list" id="biom-gen-list"></div>
                 <div class="control-group">
                     <label>CHẾ ĐỘ TRỘN:</label>
                     <div class="toggle-group">
@@ -78,12 +82,19 @@
                         <button class="sub-btn">HỖN MANG</button>
                     </div>
                 </div>
-                <button class="action-btn" id="action-biom">BẮT ĐẦU DUNG HỢP</button>
+                <button class="action-btn" onclick="AppLogic.startProcess('biom')">BẮT ĐẦU DUNG HỢP</button>
             </div>
 
             <!-- TAB 2: ULTIMATESTONE -->
             <div class="tab-content" id="tab-ultimate">
-                <div class="panel-header"><h3>CƠ THỂ GỐC</h3></div>
+                <div class="panel-header">
+                    <h3>CƠ THỂ GỐC</h3>
+                    <div class="header-actions">
+                        <button class="dice-btn" onclick="AppLogic.rollDice('ultimate')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                </div>
                 <div class="gen-list" id="ultimate-gen-list"></div>
                 <div class="control-group">
                     <label>TỈ LỆ CƠ THỂ:</label>
@@ -100,12 +111,19 @@
                         <button class="grid-btn">HƯ KHÔNG</button>
                     </div>
                 </div>
-                <button class="action-btn" id="action-ultimate">BẮT ĐẦU ÉP XUNG</button>
+                <button class="action-btn" onclick="AppLogic.startProcess('ultimate')">BẮT ĐẦU ÉP XUNG</button>
             </div>
 
             <!-- TAB 3: CHAQUESTONE -->
             <div class="tab-content" id="tab-chaques">
-                <div class="panel-header"><h3>THỂ GỐC TRIỆU HỒI</h3></div>
+                <div class="panel-header">
+                    <h3>THỂ GỐC TRIỆU HỒI</h3>
+                    <div class="header-actions">
+                        <button class="dice-btn" onclick="AppLogic.rollDice('chaques')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                </div>
                 <div class="gen-list" id="chaques-gen-list"></div>
                 <div class="control-group">
                     <label>TÍNH CÁCH ĐỒNG HÀNH:</label>
@@ -121,58 +139,13 @@
                     </div>
                     <p class="desc-box" id="waifu-desc">Mạnh mẽ, năng động, luôn bảo vệ bạn trước nguy hiểm.</p>
                 </div>
-                <button class="action-btn" id="action-chaques">TRIỆU HỒI ĐỒNG HÀNH</button>
+                <button class="action-btn" onclick="AppLogic.startProcess('chaques')">TRIỆU HỒI ĐỒNG HÀNH</button>
             </div>
         </section>
 
-        <!-- CỘT PHẢI (RESULT) -->
+        <!-- CỘT PHẢI (RESULT) - Quản lý động qua JS -->
         <section class="col-right" id="col-right">
-            <!-- IDLE STATE -->
-            <div class="state-view active" id="state-idle">
-                <svg class="hologram-pokeball" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="10 5" />
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="var(--primary-color)" stroke-width="1" opacity="0.5" />
-                    <path d="M5 50 H95 M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35 M45 50 A5 5 0 1 0 55 50 A5 5 0 1 0 45 50" fill="none" stroke="var(--primary-color)" stroke-width="2"/>
-                </svg>
-                <p class="blink-text">ĐANG CHỜ LỆNH...</p>
-            </div>
-
-            <!-- LOADING STATE -->
-            <div class="state-view" id="state-loading">
-                <div class="progress-container">
-                    <p class="blink-text">ĐANG PHÂN TÍCH CHUỖI GEN...</p>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="loading-fill"></div>
-                    </div>
-                    <p class="progress-percent" id="loading-percent">0%</p>
-                </div>
-            </div>
-
-            <!-- RESULT STATE -->
-            <div class="state-view result-hologram" id="state-result">
-                <div class="ai-image-frame" id="ai-image-container">
-                    <div class="scanline"></div>
-                    <!-- Ảnh Placeholder Sci-fi -->
-                    <div class="hologram-placeholder" id="ai-image">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2L2 22h20L12 2z"/></svg>
-                        <span>DATA RENDERED</span>
-                    </div>
-                </div>
-                <div class="ai-stats-panel">
-                    <h2 class="result-name" id="result-name">POKEMON_NULL</h2>
-                    <div class="result-types" id="result-types">
-                        <span class="type-badge">DATA</span>
-                    </div>
-                    <div class="stats-bars">
-                        <div class="stat-row"><span>HP</span><div class="bar-bg"><div class="bar-fill" id="stat-hp"></div></div></div>
-                        <div class="stat-row"><span>ATK</span><div class="bar-bg"><div class="bar-fill" id="stat-atk"></div></div></div>
-                        <div class="stat-row"><span>DEF</span><div class="bar-bg"><div class="bar-fill" id="stat-def"></div></div></div>
-                        <div class="stat-row"><span>SP.ATK</span><div class="bar-bg"><div class="bar-fill" id="stat-spatk"></div></div></div>
-                        <div class="stat-row"><span>SP.DEF</span><div class="bar-bg"><div class="bar-fill" id="stat-spdef"></div></div></div>
-                        <div class="stat-row"><span>SPD</span><div class="bar-bg"><div class="bar-fill" id="stat-spd"></div></div></div>
-                    </div>
-                </div>
-            </div>
+            <!-- Nội dung sẽ được tiêm từ JS dựa trên Tab đang active -->
         </section>
     </main>
 
@@ -188,23 +161,53 @@
         </button>
     </nav>
 
-    <!-- TEMPLATE CHO Ô NẠP GEN -->
-    <template id="gen-input-template">
-        <div class="gen-box">
-            <div class="gen-search">
-                <input type="text" class="poke-input" placeholder="Tên hoặc ID Pokemon...">
-                <button class="dice-btn" title="Random Gen">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
-                </button>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">Nội dung thông báo</div>
+
+    <!-- MODAL TÌM KIẾM POKEMON -->
+    <div id="modal-search" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="UI_MODAL.close('modal-search')">&times;</button>
+            <h2>NẠP CHUỖI GEN (TÌM KIẾM)</h2>
+            <div class="search-wrap">
+                <input type="text" id="pokemon-search-input" class="cyber-input" placeholder="Nhập tên tiếng anh hoặc ID...">
+                <button class="action-btn search-submit" id="btn-submit-search">TẢI GEN</button>
             </div>
-            <div class="gen-preview">
-                <div class="scanline"></div>
-                <div class="preview-content">
-                    <svg class="default-dna" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 4l16 16M4 20L20 4M8 8l8 8M8 16l8-8"/></svg>
-                </div>
+            <p class="desc-box" style="margin-top:10px">Ví dụ: pikachu, charizard, mewtwo, 143...</p>
+        </div>
+    </div>
+
+    <!-- MODAL CÀI ĐẶT -->
+    <div id="modal-settings" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="UI_MODAL.close('modal-settings')">&times;</button>
+            <h2>CÀI ĐẶT HỆ THỐNG</h2>
+            <div class="control-group">
+                <label>ÂM LƯỢNG HỆ THỐNG:</label>
+                <input type="range" class="cyber-slider" id="vol-slider" min="0" max="100" value="50">
             </div>
         </div>
-    </template>
+    </div>
+
+    <!-- MODAL BỘ SƯU TẬP -->
+    <div id="modal-collection" class="modal-overlay">
+        <div class="modal-box large-modal">
+            <button class="modal-close" onclick="UI_MODAL.close('modal-collection')">&times;</button>
+            <h2>BỘ SƯU TẬP TÀNG THƯ</h2>
+            <div id="collection-grid" class="collection-grid">
+                <!-- Data injected by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POKEDEX (Placeholder) -->
+    <div id="modal-pokedex" class="modal-overlay">
+        <div class="modal-box">
+            <button class="modal-close" onclick="UI_MODAL.close('modal-pokedex')">&times;</button>
+            <h2>POKÉDEX QUỐC GIA</h2>
+            <p class="desc-box">Đang kết nối tới máy chủ Pokedex trung tâm... Vui lòng thử lại sau.</p>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
