@@ -27,10 +27,9 @@ const SoundFX = {
     hover: () => SoundFX.playTone(550, 'sine', 0.08),
     click: () => SoundFX.playTone(850, 'square', 0.08),
     confirm: () => SoundFX.playTone(1200, 'triangle', 0.15),
-    remove: () => SoundFX.playTone(300, 'sawtooth', 0.2, -50) // Âm thanh trầm gỡ gen
+    remove: () => SoundFX.playTone(300, 'sawtooth', 0.2, -50)
 };
 
-// Gắn Event Hover & Click tự động
 document.addEventListener('click', (e) => { 
     if(e.target.closest('button') || e.target.closest('.size-step') || e.target.closest('.col-item')) SoundFX.click(); 
 });
@@ -46,10 +45,9 @@ const UI = {
     currentWaifu: "TOMBOY",
     activeBoxToFill: null,
     
-    // Quản lý dữ liệu Gen theo Tab (Biomstone hỗ trợ từ 2 đến 5 slot linh hoạt)
     genData: {
         ultimate: [null],
-        biom: [null, null], // Mặc định 2 slot, tối đa 5
+        biom: [null, null], 
         chaques: [null]
     },
 
@@ -61,15 +59,12 @@ const UI = {
         const titles = { ultimate: "LÕI ĐÁ ULTIMATE", biom: "LÕI ĐÁ BIOM", chaques: "LÕI ĐÁ CHAQUES" };
         document.getElementById('core-title').textContent = titles[tabId];
         
-        // Hiển thị/Ẩn các module phụ tương ứng
         document.getElementById('biom-slot-controls').style.display = (tabId === 'biom') ? 'flex' : 'none';
         document.getElementById('instability-container').style.display = (tabId === 'biom') ? 'block' : 'none';
         document.getElementById('chaquetrix-module').style.display = (tabId === 'chaques') ? 'block' : 'none';
         
         this.renderGenBoxes();
         if(tabId === 'biom') this.updateInstability();
-        
-        // Reset về màn hình chờ cột phải
         this.showIdleView();
     },
 
@@ -95,7 +90,6 @@ const UI = {
     openModal: (id) => document.getElementById(id).classList.add('active'),
     closeModal: (id) => document.getElementById(id).classList.remove('active'),
 
-    // Quản lý số lượng slot Biomstone (2 -> 5)
     adjustBiomSlots: function(change) {
         SoundFX.click();
         let currentLen = this.genData.biom.length;
@@ -120,7 +114,6 @@ const UI = {
         document.getElementById('instability-fill').style.width = `${score}%`;
     },
 
-    // --- POKEDEX MODAL & FILTER ---
     openPokedex: function(boxIndex = null) {
         this.activeBoxToFill = boxIndex;
         this.renderPokedexGrid(PokemonDB);
@@ -156,13 +149,12 @@ const UI = {
 
     removePokemon: function(index, e) {
         e.stopPropagation();
-        SoundFX.remove(); // Phát âm thanh gỡ gen đặc trưng
+        SoundFX.remove();
         this.genData[this.currentTab][index] = null;
         this.renderGenBoxes();
         if(this.currentTab === 'biom') this.updateInstability();
     },
 
-    // --- RENDER GEN BOXES ---
     renderGenBoxes: function() {
         const container = document.getElementById('gen-list-container');
         container.innerHTML = '';
@@ -196,7 +188,7 @@ const UI = {
     }
 };
 
-// Khởi tạo Event cho 7 nấc Size Scale
+// Event handlers
 document.querySelectorAll('.size-step').forEach(el => {
     el.addEventListener('click', () => {
         document.querySelectorAll('.size-step').forEach(s => s.classList.remove('active'));
@@ -206,7 +198,6 @@ document.querySelectorAll('.size-step').forEach(el => {
     });
 });
 
-// Khởi tạo Event cho Waifu Personality Grid
 document.querySelectorAll('.grid-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
@@ -216,10 +207,9 @@ document.querySelectorAll('.grid-btn').forEach(btn => {
     });
 });
 
-// --- 3. CORE LOGIC & MÀN HÌNH CHỜ TIẾN TRÌNH ---
+// --- 3. CORE LOGIC VỚI KẾT NỐI BẤT ĐỒNG BỘ AI ---
 const CoreLogic = {
     randomizeAll: function() {
-        // Thêm hiệu ứng shake cho nút xúc xắc
         const diceBtn = document.getElementById('dice-btn');
         diceBtn.classList.add('shaking');
         setTimeout(() => diceBtn.classList.remove('shaking'), 400);
@@ -241,12 +231,10 @@ const CoreLogic = {
         }
         SoundFX.confirm();
         
-        // Chuyển sang mobile tab kết quả nếu đang ở mobile
         if(window.innerWidth <= 768) {
             UI.switchMobileTab('result');
         }
 
-        // Hiển thị màn hình loading với thanh progress bar chạy từ 0 đến 100%
         document.getElementById('idle-view').style.display = 'none';
         document.getElementById('result-view').classList.remove('active');
         const loadingView = document.getElementById('loading-view');
@@ -258,43 +246,45 @@ const CoreLogic = {
         
         const logs = [
             "Đang đồng bộ hóa chuỗi DNA...",
-            "Đang thiết lập trường sinh học cộng hưởng...",
-            "Đang kết xuất mô hình thực thể AI...",
-            "Hoàn tất cấu trúc sinh vật biến dị..."
+            "Đang suy luận Prompt hình ảnh & Lore...",
+            "Đang truyền tải qua AI Generator lượng tử...",
+            "Hoàn tất kết xuất thực thể AI..."
         ];
 
         let currentPercent = 0;
         progressFill.style.width = '0%';
         percentText.textContent = '0%';
         
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             currentPercent += Math.floor(Math.random() * 8) + 5;
             if(currentPercent >= 100) {
                 currentPercent = 100;
                 clearInterval(interval);
-                setTimeout(() => {
-                    loadingView.style.display = 'none';
-                    this.showResult();
-                }, 300);
+                // Gọi hàm bất đồng bộ hiển thị kết quả
+                await this.showResult();
+                loadingView.style.display = 'none';
+            } else {
+                progressFill.style.width = `${currentPercent}%`;
+                percentText.textContent = `${currentPercent}%`;
+                let logIndex = Math.floor((currentPercent / 100) * logs.length);
+                statusText.textContent = logs[logIndex < logs.length ? logIndex : logs.length - 1];
             }
-            progressFill.style.width = `${currentPercent}%`;
-            percentText.textContent = `${currentPercent}%`;
-            
-            let logIndex = Math.floor((currentPercent / 100) * logs.length);
-            if(logIndex >= logs.length) logIndex = logs.length - 1;
-            statusText.textContent = logs[logIndex];
         }, 80);
     },
 
-    showResult: function() {
+    // SỬA THÀNH ASYNC ĐỂ CHỜ KẾT QUẢ TỪ API GENERATOR
+    showResult: async function() {
         const arr = UI.genData[UI.currentTab];
         const p1 = arr[0];
         
-        // 1. Lấy Image Prompt & Lore độc bản từ AI Generator
+        // 1. Hệ thống suy luận Prompt Hình ảnh & Lore
         const imgPrompt = AIGenerator.buildImagePrompt(arr, UI.currentTab, UI.currentSize, UI.currentWaifu);
-        const loreText = AIGenerator.buildLorePrompt(arr, UI.currentTab, UI.currentWaifu);
         
-        // 2. Tạo tên thực thể
+        // 2. Gửi request bất đồng bộ đến ai-generator.js
+        const loreText = await AIGenerator.generateLoreFromAPI(arr, UI.currentTab, UI.currentWaifu);
+        const aiImageUrl = await AIGenerator.generateImageFromAPI(imgPrompt);
+        
+        // 3. Đặt tên thực thể lai tạo
         let finalName = "";
         if(UI.currentTab === 'biom') {
             finalName = arr.map(p => p.name.substring(0, 3)).join('-').toUpperCase();
@@ -304,16 +294,18 @@ const CoreLogic = {
             finalName = `MECHA-WAIFU: ${p1.name}`;
         }
 
-        // 3. Render Hologram kết quả
+        // 4. Render Hologram Kết Quả với Ảnh AI & Lore từ Gemini
         const resultView = document.getElementById('result-view');
         resultView.classList.add('active');
         resultView.innerHTML = `
-            <div class="ai-img-box"><img src="${p1.img}"></div>
+            <div class="ai-img-box">
+                <img src="${aiImageUrl}" alt="${finalName}" onerror="this.src='${p1.img}'">
+            </div>
             <div class="ai-data">
                 <h2 class="ai-name">${finalName}</h2>
                 <p class="ai-lore">"${loreText}"</p>
                 <div class="ai-prompt">
-                    <strong>SYSTEM PROMPT & AI IMAGE PARAMETERS:</strong><br>
+                    <strong>INFERRED SYSTEM PROMPT & AI PARAMETERS:</strong><br>
                     ${imgPrompt}
                 </div>
             </div>
@@ -322,5 +314,5 @@ const CoreLogic = {
     }
 };
 
-// Khởi chạy UI ban đầu
+// Khởi tạo tab mặc định
 UI.switchTab('biom');
