@@ -1,56 +1,67 @@
-// Cấu hình Header và Text cho từng loại Đá/Thiết bị
-const HEADER_CONFIG = {
+// Cấu hình dữ liệu hiển thị cho các Tab
+const LAB_CONFIG = {
   biostone: {
     title: 'BIOSTONE',
-    subtitle: 'PokemonLab // Ash Ketchum',
-    processText: 'PHÂN TÍCH GEN POKEMON...',
     btnText: 'DUNG HỢP GEN'
   },
   ultimatestone: {
     title: 'ULTIMATESTONE',
-    subtitle: 'PokemonLab // Paul',
-    processText: 'KÍCH HOẠT GEN TIẾN HÓA MEGA...',
     btnText: 'TIẾN HÓA MEGA'
   },
   chaquestone: {
     title: 'CHAQUESTONE',
-    subtitle: 'PokemonLab // Brock',
-    processText: 'ĐỒNG BỘ HÓA GEN ĐỒNG HÀNH...',
     btnText: 'TRIỆU HỒI ĐỒNG HÀNH'
   }
 };
 
-// Dữ liệu Pokemon
+// Dữ liệu giả lập Kho lưu trữ GEN Pokemon
 const POKEMON_DATA = [
-  { id: 1, name: "Charizard", genType: "Fire/Flying", stats: { power: 8, speed: 6, durability: 7, intelligence: 6, energy: 9 } },
-  { id: 2, name: "Machamp", genType: "Fighting", stats: { power: 10, speed: 5, durability: 9, intelligence: 4, energy: 5 } },
-  { id: 3, name: "Deoxys", genType: "Psychic", stats: { power: 5, speed: 10, durability: 5, intelligence: 7, energy: 6 } }
+  { id: 1, name: "Charizard", genType: "Fire/Flying" },
+  { id: 2, name: "Machamp", genType: "Fighting" },
+  { id: 3, name: "Deoxys", genType: "Psychic" },
+  { id: 4, name: "Diancie", genType: "Rock/Fairy" },
+  { id: 5, name: "Rotom", genType: "Electric/Ghost" }
 ];
 
-// Hàm chuyển đổi theme
-function switchTheme(themeName) {
-  // Cập nhật class trên body
-  document.body.className = '';
-  document.body.classList.add(`theme-${themeName}`);
+// Hàm render danh sách Pokemon
+function renderPokemonList() {
+  const container = document.getElementById('pokemon-list');
+  container.innerHTML = ''; // Xóa rỗng trước khi render
   
-  // Cập nhật tiêu đề và text hiển thị
-  const config = HEADER_CONFIG[themeName];
-  if(config) {
-    document.getElementById('app-title').innerText = config.title;
-    document.querySelector('.btn-text').innerText = config.btnText;
-    console.log(`[PokemonLab] Đã chuyển sang cấu hình: ${config.title}`);
-  }
+  POKEMON_DATA.forEach(pokemon => {
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    card.innerHTML = `
+      <div class="pokemon-name">#${pokemon.id} ${pokemon.name}</div>
+      <div class="pokemon-gen">Hệ GEN: ${pokemon.genType}</div>
+    `;
+    container.appendChild(card);
+  });
 }
 
-// Bắt sự kiện chuyển tab
+// Xử lý sự kiện click chuyển Tab
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', (e) => {
-    // Xóa active class ở các tab khác
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab-active'));
-    e.target.classList.add('tab-active');
+    // 1. Cập nhật trạng thái Active cho Tab
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    e.target.classList.add('active');
     
-    // Gọi hàm đổi theme
+    // 2. Lấy dữ liệu tab được chọn
     const selectedTab = e.target.getAttribute('data-tab');
-    switchTheme(selectedTab);
+    const config = LAB_CONFIG[selectedTab];
+    
+    // 3. Đổi Theme (Màu sắc) bằng cách đổi class trên body
+    document.body.className = `theme-${selectedTab}`;
+    
+    // 4. Cập nhật text trên giao diện
+    if (config) {
+      document.getElementById('app-title').innerText = config.title;
+      document.querySelector('.btn-text').innerText = config.btnText;
+    }
   });
+});
+
+// Khởi chạy khi tải trang
+window.addEventListener('DOMContentLoaded', () => {
+  renderPokemonList();
 });
