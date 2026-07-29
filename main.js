@@ -2,7 +2,7 @@
  * HỆ THỐNG ĐIỀU KHIỂN CHÍNH (MAIN.JS)
  */
 
-// --- 1. HỆ THỐNG ÂM THANH SCI-FI (WEB AUDIO API) ---
+// --- 1. HỆ THỐNG ÂM THANH WEB AUDIO API (SFX) ---
 const SoundFX = {
     enabled: true,
     ctx: new (window.AudioContext || window.webkitAudioContext)(),
@@ -10,67 +10,137 @@ const SoundFX = {
         this.enabled = !this.enabled;
         document.getElementById('btn-toggle-sound').textContent = this.enabled ? "ĐANG BẬT 🔊" : "ĐÃ TẮT 🔇";
     },
-    playTone: function(freq, type, duration) {
+    playTone: function(freq, type, duration, detune = 0) {
         if (!this.enabled) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + duration);
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type; 
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            osc.detune.setValueAtTime(detune, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
     },
-    hover: () => SoundFX.playTone(600, 'sine', 0.1),
-    click: () => SoundFX.playTone(900, 'square', 0.1),
-    confirm: () => SoundFX.playTone(1200, 'triangle', 0.2)
+    hover: () => SoundFX.playTone(550, 'sine', 0.08),
+    click: () => SoundFX.playTone(850, 'square', 0.08),
+    confirm: () => SoundFX.playTone(1200, 'triangle', 0.15),
+    remove: () => SoundFX.playTone(300, 'sawtooth', 0.2, -50) // Âm thanh trầm gỡ gen
 };
 
-// Gắn Event Hover/Click cho toàn bộ Button
-document.addEventListener('click', (e) => { if(e.target.closest('button') || e.target.closest('.size-step')) SoundFX.click(); });
-document.addEventListener('mouseover', (e) => { if(e.target.closest('button')) SoundFX.hover(); });
+// Gắn Event Hover & Click tự động
+document.addEventListener('click', (e) => { 
+    if(e.target.closest('button') || e.target.closest('.size-step') || e.target.closest('.col-item')) SoundFX.click(); 
+});
+document.addEventListener('mouseover', (e) => { 
+    if(e.target.closest('button')) SoundFX.hover(); 
+});
 
-// --- 2. QUẢN LÝ GIAO DIỆN & MODAL ---
+// --- 2. QUẢN LÝ GIAO DIỆN & STATE ---
 const UI = {
     currentTab: 'biom',
     sizeTexts: ["SIÊU NHỎ", "RẤT NHỎ", "NHỎ", "B.THƯỜNG", "LỚN", "RẤT LỚN", "SIÊU LỚN"],
     currentSize: "B.THƯỜNG",
     currentWaifu: "TOMBOY",
     activeBoxToFill: null,
-    genData: { biom: [null, null], ultimate: [null], chaques: [null] },
+    
+    // Quản lý dữ liệu Gen theo Tab (Biomstone hỗ trợ từ 2 đến 5 slot linh hoạt)
+    genData: {
+        ultimate: [null],
+        biom: [null, null], // Mặc định 2 slot, tối đa 5
+        chaques: [null]
+    },
 
     switchTab: function(tabId) {
         this.currentTab = tabId;
         document.body.className = `theme-${tabId}`;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.theme === tabId));
         
-        const titles = { biom: "BIOMNITRIX", ultimate: "ULTIMATE CORE", chaques: "CHAQUETRIX" };
+        const titles = { ultimate: "LÕI ĐÁ ULTIMATE", biom: "LÕI ĐÁ BIOM", chaques: "LÕI ĐÁ CHAQUES" };
         document.getElementById('core-title').textContent = titles[tabId];
         
-        document.getElementById('chaquetrix-module').style.display = (tabId === 'chaques' || tabId === 'ultimate') ? 'block' : 'none';
-        document.getElementById('waifu-grid').parentElement.style.display = tabId === 'chaques' ? 'block' : 'none';
+        // Hiển thị/Ẩn các module phụ tương ứng
+        document.getElementById('biom-slot-controls').style.display = (tabId === 'biom') ? 'flex' : 'none';
+        document.getElementById('instability-container').style.display = (tabId === 'biom') ? 'block' : 'none';
+        document.getElementById('chaquetrix-module').style.display = (tabId === 'chaques') ? 'block' : 'none';
         
         this.renderGenBoxes();
-        document.getElementById('col-right').innerHTML = `
-            <div class="state-view active" id="idle-view">
-                <div class="core-anim-container"><div class="pulse-ring"></div></div>
-                <p class="status-text">ĐANG CHỜ LỆNH HỆ THỐNG...</p>
-            </div>`;
+        if(tabId === 'biom') this.updateInstability();
+        
+        // Reset về màn hình chờ cột phải
+        this.showIdleView();
+    },
+
+    switchMobileTab: function(viewName) {
+        document.querySelectorAll('.m-nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`mnav-${viewName}`).classList.add('active');
+        
+        if(viewName === 'lab') {
+            document.getElementById('col-left-panel').classList.add('mobile-active');
+            document.getElementById('col-right').classList.remove('mobile-active');
+        } else {
+            document.getElementById('col-right').classList.add('mobile-active');
+            document.getElementById('col-left-panel').classList.remove('mobile-active');
+        }
+    },
+
+    showIdleView: function() {
+        document.getElementById('idle-view').style.display = 'flex';
+        document.getElementById('loading-view').style.display = 'none';
+        document.getElementById('result-view').classList.remove('active');
     },
 
     openModal: (id) => document.getElementById(id).classList.add('active'),
     closeModal: (id) => document.getElementById(id).classList.remove('active'),
 
-    // --- POKEDEX GRID ---
+    // Quản lý số lượng slot Biomstone (2 -> 5)
+    adjustBiomSlots: function(change) {
+        SoundFX.click();
+        let currentLen = this.genData.biom.length;
+        let newLen = currentLen + change;
+        if(newLen >= 2 && newLen <= 5) {
+            if(newLen > currentLen) {
+                this.genData.biom.push(null);
+            } else {
+                this.genData.biom.pop();
+            }
+            document.getElementById('biom-slot-count').textContent = this.genData.biom.length;
+            this.renderGenBoxes();
+            this.updateInstability();
+        }
+    },
+
+    updateInstability: function() {
+        const filledCount = this.genData.biom.filter(Boolean).length;
+        const totalSlots = this.genData.biom.length;
+        const score = Math.min(100, Math.round((filledCount / totalSlots) * 35 + (totalSlots * 12)));
+        document.getElementById('instability-val').textContent = `${score}%`;
+        document.getElementById('instability-fill').style.width = `${score}%`;
+    },
+
+    // --- POKEDEX MODAL & FILTER ---
     openPokedex: function(boxIndex = null) {
-        this.activeBoxToFill = boxIndex; // Nếu null là mở để xem, có index là để chọn
+        this.activeBoxToFill = boxIndex;
+        this.renderPokedexGrid(PokemonDB);
+        this.openModal('modal-pokedex');
+    },
+
+    renderPokedexGrid: function(list) {
         const grid = document.getElementById('dex-grid');
-        grid.innerHTML = PokemonDB.map(p => `
+        grid.innerHTML = list.map(p => `
             <div class="col-item" onclick="UI.selectPokemon(${p.id})">
                 <img src="${p.img}">
                 <span>${p.name}</span>
             </div>
         `).join('');
-        this.openModal('modal-pokedex');
+    },
+
+    filterPokedex: function(keyword) {
+        const key = keyword.toLowerCase().trim();
+        const filtered = PokemonDB.filter(p => p.name.toLowerCase().includes(key) || p.id.toString() === key);
+        this.renderPokedexGrid(filtered);
     },
 
     selectPokemon: function(id) {
@@ -78,6 +148,7 @@ const UI = {
         if(this.activeBoxToFill !== null && pkmn) {
             this.genData[this.currentTab][this.activeBoxToFill] = pkmn;
             this.renderGenBoxes();
+            if(this.currentTab === 'biom') this.updateInstability();
             SoundFX.confirm();
         }
         this.closeModal('modal-pokedex');
@@ -85,11 +156,13 @@ const UI = {
 
     removePokemon: function(index, e) {
         e.stopPropagation();
+        SoundFX.remove(); // Phát âm thanh gỡ gen đặc trưng
         this.genData[this.currentTab][index] = null;
         this.renderGenBoxes();
+        if(this.currentTab === 'biom') this.updateInstability();
     },
 
-    // --- RENDER BOX ---
+    // --- RENDER GEN BOXES ---
     renderGenBoxes: function() {
         const container = document.getElementById('gen-list-container');
         container.innerHTML = '';
@@ -100,27 +173,30 @@ const UI = {
                 container.innerHTML += `
                     <div class="gen-box empty" onclick="UI.openPokedex(${i})">
                         <div class="empty-ui">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <span>NẠP MÃ GEN</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            <span>NẠP MÃ GEN #${i+1}</span>
                         </div>
                     </div>`;
             } else {
                 container.innerHTML += `
                     <div class="gen-box filled" onclick="UI.openPokedex(${i})">
                         <div class="filled-top">
-                            <span>DNA SEQ #${pkmn.id}</span>
-                            <button class="btn-remove" onclick="UI.removePokemon(${i}, event)">&times;</button>
+                            <span>GEN SEQ #${pkmn.id}</span>
+                            <button class="btn-remove" onclick="UI.removePokemon(${i}, event)" title="Gỡ Pokemon">&times;</button>
                         </div>
-                        <div class="filled-img"><img src="${pkmn.img}"></div>
+                        <div class="filled-img">
+                            <img src="${pkmn.img}">
+                            <div class="hover-hint">NHẤN ĐỂ ĐỔI DNA</div>
+                        </div>
                         <div class="filled-name">${pkmn.name}</div>
-                        <div class="filled-size">HỆ: ${pkmn.types.join(' - ').toUpperCase()}</div>
+                        <div class="filled-size">${pkmn.types.join(' / ').toUpperCase()}</div>
                     </div>`;
             }
         });
     }
 };
 
-// Khởi tạo Event cho Scale 7 nấc
+// Khởi tạo Event cho 7 nấc Size Scale
 document.querySelectorAll('.size-step').forEach(el => {
     el.addEventListener('click', () => {
         document.querySelectorAll('.size-step').forEach(s => s.classList.remove('active'));
@@ -130,7 +206,7 @@ document.querySelectorAll('.size-step').forEach(el => {
     });
 });
 
-// Khởi tạo Event cho Waifu Grid
+// Khởi tạo Event cho Waifu Personality Grid
 document.querySelectorAll('.grid-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         document.querySelectorAll('.grid-btn').forEach(b => b.classList.remove('active'));
@@ -140,69 +216,111 @@ document.querySelectorAll('.grid-btn').forEach(btn => {
     });
 });
 
-// --- 3. LÕI XỬ LÝ (CORE LOGIC) ---
+// --- 3. CORE LOGIC & MÀN HÌNH CHỜ TIẾN TRÌNH ---
 const CoreLogic = {
     randomizeAll: function() {
+        // Thêm hiệu ứng shake cho nút xúc xắc
+        const diceBtn = document.getElementById('dice-btn');
+        diceBtn.classList.add('shaking');
+        setTimeout(() => diceBtn.classList.remove('shaking'), 400);
+
         const arr = UI.genData[UI.currentTab];
         for(let i = 0; i < arr.length; i++) {
             arr[i] = getRandomPokemon();
         }
         UI.renderGenBoxes();
+        if(UI.currentTab === 'biom') UI.updateInstability();
         SoundFX.confirm();
     },
 
     startSequence: function() {
         const arr = UI.genData[UI.currentTab];
         if(arr.includes(null)) {
-            alert("CẢNH BÁO: Phải nạp đủ mã DNA trước khi dung hợp!"); return;
+            alert("CẢNH BÁO LƯỢNG TỬ: Phải nạp đầy đủ tất cả các slot gen yêu cầu trước khi tiến hành khởi chạy!"); 
+            return;
         }
         SoundFX.confirm();
         
-        const colRight = document.getElementById('col-right');
-        colRight.innerHTML = `
-            <div class="state-view active" style="flex-direction:column; align-items:center;">
-                <div class="core-anim-container"><div class="pulse-ring" style="border-color:var(--primary-color)"></div></div>
-                <p class="status-text">ĐANG KẾT XUẤT HÌNH ẢNH API...</p>
-            </div>
-        `;
+        // Chuyển sang mobile tab kết quả nếu đang ở mobile
+        if(window.innerWidth <= 768) {
+            UI.switchMobileTab('result');
+        }
 
-        setTimeout(() => { this.showResult(); }, 2000);
+        // Hiển thị màn hình loading với thanh progress bar chạy từ 0 đến 100%
+        document.getElementById('idle-view').style.display = 'none';
+        document.getElementById('result-view').classList.remove('active');
+        const loadingView = document.getElementById('loading-view');
+        loadingView.style.display = 'flex';
+        
+        const progressFill = document.getElementById('progress-fill');
+        const percentText = document.getElementById('progress-percent');
+        const statusText = document.getElementById('loading-status-text');
+        
+        const logs = [
+            "Đang đồng bộ hóa chuỗi DNA...",
+            "Đang thiết lập trường sinh học cộng hưởng...",
+            "Đang kết xuất mô hình thực thể AI...",
+            "Hoàn tất cấu trúc sinh vật biến dị..."
+        ];
+
+        let currentPercent = 0;
+        progressFill.style.width = '0%';
+        percentText.textContent = '0%';
+        
+        const interval = setInterval(() => {
+            currentPercent += Math.floor(Math.random() * 8) + 5;
+            if(currentPercent >= 100) {
+                currentPercent = 100;
+                clearInterval(interval);
+                setTimeout(() => {
+                    loadingView.style.display = 'none';
+                    this.showResult();
+                }, 300);
+            }
+            progressFill.style.width = `${currentPercent}%`;
+            percentText.textContent = `${currentPercent}%`;
+            
+            let logIndex = Math.floor((currentPercent / 100) * logs.length);
+            if(logIndex >= logs.length) logIndex = logs.length - 1;
+            statusText.textContent = logs[logIndex];
+        }, 80);
     },
 
     showResult: function() {
-        const p1 = UI.genData[UI.currentTab][0];
-        const p2 = UI.genData[UI.currentTab][1]; // Có thể undefined
+        const arr = UI.genData[UI.currentTab];
+        const p1 = arr[0];
         
-        // 1. Lấy Image Prompt
-        const imgPrompt = AIGenerator.buildImagePrompt(p1, p2, UI.currentTab, UI.currentSize, UI.currentWaifu);
+        // 1. Lấy Image Prompt & Lore độc bản từ AI Generator
+        const imgPrompt = AIGenerator.buildImagePrompt(arr, UI.currentTab, UI.currentSize, UI.currentWaifu);
+        const loreText = AIGenerator.buildLorePrompt(arr, UI.currentTab, UI.currentWaifu);
         
-        // 2. Lấy Text Lore
-        const loreText = AIGenerator.buildLorePrompt(p1, p2, UI.currentTab, UI.currentWaifu);
-        
-        // 3. Đặt Tên
+        // 2. Tạo tên thực thể
         let finalName = "";
-        if(UI.currentTab === 'biom') finalName = (p1.name.substring(0, Math.ceil(p1.name.length/2)) + p2.name.substring(Math.floor(p2.name.length/2))).toUpperCase();
-        else if (UI.currentTab === 'ultimate') finalName = `OMEGA ${p1.name}`;
-        else finalName = `PROJECT: ${p1.name}`;
+        if(UI.currentTab === 'biom') {
+            finalName = arr.map(p => p.name.substring(0, 3)).join('-').toUpperCase();
+        } else if (UI.currentTab === 'ultimate') {
+            finalName = `OMEGA-ULTRA ${p1.name}`;
+        } else {
+            finalName = `MECHA-WAIFU: ${p1.name}`;
+        }
 
-        // Render ra kết quả (Sử dụng ảnh base của p1 minh họa)
-        const colRight = document.getElementById('col-right');
-        colRight.innerHTML = `
-            <div class="result-hologram active">
-                <div class="ai-img-box"><img src="${p1.img}"></div>
-                <div class="ai-data">
-                    <h2 class="ai-name">${finalName}</h2>
-                    <p class="ai-lore">"${loreText}"</p>
-                    <div class="ai-prompt">
-                        <strong>LỆNH GỬI API ẢNH:</strong><br>
-                        ${imgPrompt}
-                    </div>
+        // 3. Render Hologram kết quả
+        const resultView = document.getElementById('result-view');
+        resultView.classList.add('active');
+        resultView.innerHTML = `
+            <div class="ai-img-box"><img src="${p1.img}"></div>
+            <div class="ai-data">
+                <h2 class="ai-name">${finalName}</h2>
+                <p class="ai-lore">"${loreText}"</p>
+                <div class="ai-prompt">
+                    <strong>SYSTEM PROMPT & AI IMAGE PARAMETERS:</strong><br>
+                    ${imgPrompt}
                 </div>
             </div>
         `;
-        SoundFX.playTone(800, 'sine', 0.5);
+        SoundFX.playTone(950, 'sine', 0.4);
     }
 };
 
-// Init UI ban đầu
+// Khởi chạy UI ban đầu
 UI.switchTab('biom');
